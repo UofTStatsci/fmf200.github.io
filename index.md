@@ -1,4 +1,3 @@
-</> Markdown
 ---
 layout: default
 title: The Future of Mathematical Finance
