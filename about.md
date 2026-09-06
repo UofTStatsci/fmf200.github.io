@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Program
-permalink: /program/
+title: About
+permalink: /about/
 ---
 
 # About
