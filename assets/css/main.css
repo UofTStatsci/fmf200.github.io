@@ -5,7 +5,9 @@
    ================================================== */
 
 
-/* ---------- Reset & Base ---------- */
+/* ==================================================
+   RESET & BASE
+   ================================================== */
 
 *,
 *::before,
@@ -36,7 +38,9 @@ a {
 }
 
 
-/* ---------- Layout ---------- */
+/* ==================================================
+   LAYOUT
+   ================================================== */
 
 .container {
   width: 100%;
@@ -48,22 +52,34 @@ a {
 }
 
 
-/* ---------- Header ---------- */
+/* ==================================================
+   HEADER
+   ================================================== */
 
 .site-header {
+  position: relative;
+  z-index: 1000;
   width: 100%;
   background: #ffffff;
   border-bottom: 1px solid #e5e5e5;
 }
 
 .header-inner {
+  position: relative;
   min-height: 76px;
+
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+
   gap: 40px;
 }
+
+
+/* ==================================================
+   SITE BRAND
+   ================================================== */
 
 .site-brand {
   display: block;
@@ -81,25 +97,32 @@ a {
 }
 
 
-/* ---------- Navigation ---------- */
+/* ==================================================
+   DESKTOP NAVIGATION
+   ================================================== */
 
 .main-nav {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
+
   gap: 28px;
   margin-left: auto;
 }
 
 .main-nav a {
   display: block;
+
   padding: 26px 0 23px;
+
   border-bottom: 3px solid transparent;
+
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 600;
   line-height: 1.5;
+
   white-space: nowrap;
 }
 
@@ -110,81 +133,140 @@ a {
 }
 
 
-/* ---------- Main Content ---------- */
-
-main {
-  padding-top: 48px;
-  padding-bottom: 48px;
-}
-/* ---------- Mobile Navigation ---------- */
+/* ==================================================
+   MOBILE MENU BUTTON
+   ================================================== */
 
 .nav-toggle {
   display: none;
+
   width: 44px;
   height: 44px;
+
   padding: 10px;
+
   background: transparent;
+  color: #1a1a1a;
+
   border: 0;
+
   cursor: pointer;
 }
 
 .nav-toggle span {
   display: block;
+
   width: 24px;
   height: 2px;
+
   margin: 5px auto;
-  background: currentColor;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+
+  background-color: currentColor;
+
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
-@media (max-width: 900px) {
+
+/* ==================================================
+   MAIN CONTENT
+   ================================================== */
+
+main {
+  padding-top: 48px;
+  padding-bottom: 48px;
+}
+
+
+/* ==================================================
+   MOBILE NAVIGATION
+   ================================================== */
+
+@media screen and (max-width: 900px) {
+
+  .container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
 
   .header-inner {
-    position: relative;
     min-height: 70px;
+    gap: 20px;
   }
+
+
+  /* Show hamburger */
 
   .nav-toggle {
     display: block;
+    flex: 0 0 auto;
     margin-left: auto;
   }
 
+
+  /* Hide navigation by default */
+
   .main-nav {
     display: none;
+
     position: absolute;
     top: 100%;
     left: 0;
     right: 0;
-    z-index: 1000;
+
+    width: 100%;
 
     flex-direction: column;
     align-items: stretch;
-    gap: 0;
 
+    gap: 0;
     margin: 0;
-    padding: 12px 32px 24px;
+    padding: 12px 24px 24px;
 
     background: #ffffff;
+
     border-top: 1px solid #e5e5e5;
     border-bottom: 1px solid #e5e5e5;
+
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   }
+
+
+  /* Show navigation when opened */
 
   .main-nav.is-open {
     display: flex;
   }
 
+
+  /* Mobile navigation links */
+
   .main-nav a {
+    width: 100%;
+
     padding: 14px 0;
+
     border-bottom: 1px solid #e5e5e5;
+
+    font-size: 1rem;
   }
 
   .main-nav a:last-child {
     border-bottom: 0;
   }
 
+  .main-nav a:hover,
+  .main-nav a:focus {
+    border-bottom-color: #e5e5e5;
+  }
+
   .main-nav a.active {
     font-weight: 700;
   }
+
+
+  /* Hamburger → X animation */
 
   .nav-toggle.is-open span:nth-child(1) {
     transform: translateY(7px) rotate(45deg);
@@ -197,4 +279,28 @@ main {
   .nav-toggle.is-open span:nth-child(3) {
     transform: translateY(-7px) rotate(-45deg);
   }
+
+}
+
+
+/* ==================================================
+   SMALL MOBILE
+   ================================================== */
+
+@media screen and (max-width: 480px) {
+
+  .container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .site-brand-name {
+    font-size: 1.35rem;
+  }
+
+  main {
+    padding-top: 36px;
+    padding-bottom: 36px;
+  }
+
 }
