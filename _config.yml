@@ -8,8 +8,8 @@ description: >
   University of Toronto.
 
 # Site URL
-baseurl: "/"
 url: "https://uoftstatsci.github.io"
+baseurl: "/fmf200.github.io"
 
 # Social metadata
 social:
@@ -35,7 +35,9 @@ exclude:
   - gulpfile.js
   - sleek.png
 
-include: ['_pages']
+include:
+  - _pages
+
 permalink: /:title/
 
 compress_html:
