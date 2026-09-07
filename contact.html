@@ -13,24 +13,36 @@
 <body>
 
   <header class="site-header">
-    <div class="container header-inner">
+  <div class="container header-inner">
 
-      <a class="site-brand" href="index.html" aria-label="FMF200 home">
-        <span class="site-brand-name">FMF200</span>
-      </a>
+    <a class="site-brand" href="index.html" aria-label="FMF200 home">
+      <span class="site-brand-name">FMF200</span>
+    </a>
 
-      <nav class="main-nav" aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a href="about.html">About</a>
-        <a href="program.html">Program</a>
-        <a href="speakers.html">Speakers</a>
-        <a href="registration.html">Registration</a>
-        <a href="travel.html">Travel</a>
-        <a href="contact.html" class="active">Contact</a>
-      </nav>
+    <button
+      class="nav-toggle"
+      type="button"
+      aria-label="Open navigation"
+      aria-expanded="false"
+      aria-controls="main-navigation"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
 
-    </div>
-  </header>
+    <nav class="main-nav" id="main-navigation" aria-label="Main navigation">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="program.html">Program</a>
+      <a href="speakers.html">Speakers</a>
+      <a href="registration.html">Registration</a>
+      <a href="travel.html">Travel</a>
+      <a href="contact.html" class="active">Contact</a>
+    </nav>
+
+  </div>
+</header>
 
   <main class="container">
     <h1>Contact</h1>
@@ -40,4 +52,5 @@
   <script src="assets/js/main.js"></script>
 
 </body>
+  <script src="assets/js/main.js"></script>
 </html>
