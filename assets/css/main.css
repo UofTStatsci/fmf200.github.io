@@ -5,7 +5,7 @@
    ================================================== */
 
 
-/* ---------- Base ---------- */
+/* ---------- Reset & Base ---------- */
 
 *,
 *::before,
@@ -21,9 +21,12 @@ body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
   line-height: 1.6;
+  color: #1a1a1a;
+  background: #ffffff;
 }
 
 img {
+  display: block;
   max-width: 100%;
   height: auto;
 }
@@ -36,12 +39,19 @@ a {
 /* ---------- Layout ---------- */
 
 .container {
-  width: min(1200px, calc(100% - 40px));
-  margin: 0 auto;
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 32px;
+  padding-right: 32px;
 }
+
+
 /* ---------- Header ---------- */
 
 .site-header {
+  width: 100%;
   background: #ffffff;
   border-bottom: 1px solid #e5e5e5;
 }
@@ -49,41 +59,60 @@ a {
 .header-inner {
   min-height: 76px;
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: 40px;
 }
 
 .site-brand {
+  display: block;
+  flex: 0 0 auto;
   text-decoration: none;
-  flex-shrink: 0;
 }
 
 .site-brand-name {
+  display: block;
   font-size: 1.5rem;
   font-weight: 700;
+  line-height: 1;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
+
+
+/* ---------- Navigation ---------- */
 
 .main-nav {
   display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: flex-end;
   gap: 28px;
+  margin-left: auto;
 }
 
 .main-nav a {
+  display: block;
+  padding: 26px 0 23px;
+  border-bottom: 3px solid transparent;
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 600;
-  padding: 26px 0 23px;
-  border-bottom: 3px solid transparent;
+  line-height: 1.5;
+  white-space: nowrap;
 }
 
 .main-nav a:hover,
-.main-nav a:focus {
+.main-nav a:focus,
+.main-nav a.active {
   border-bottom-color: currentColor;
 }
 
-.main-nav a.active {
-  border-bottom-color: currentColor;
+
+/* ---------- Main Content ---------- */
+
+main {
+  padding-top: 48px;
+  padding-bottom: 48px;
 }
