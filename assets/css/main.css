@@ -39,3 +39,51 @@ a {
   width: min(1200px, calc(100% - 40px));
   margin: 0 auto;
 }
+/* ---------- Header ---------- */
+
+.site-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.header-inner {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.site-brand {
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.site-brand-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.main-nav a {
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 26px 0 23px;
+  border-bottom: 3px solid transparent;
+}
+
+.main-nav a:hover,
+.main-nav a:focus {
+  border-bottom-color: currentColor;
+}
+
+.main-nav a.active {
+  border-bottom-color: currentColor;
+}
