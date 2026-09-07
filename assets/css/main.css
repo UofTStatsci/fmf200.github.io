@@ -106,23 +106,19 @@ a {
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
-
   gap: 28px;
   margin-left: auto;
 }
 
 .main-nav a {
   display: block;
-
   padding: 26px 0 23px;
-
   border-bottom: 3px solid transparent;
 
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 600;
   line-height: 1.5;
-
   white-space: nowrap;
 }
 
@@ -139,29 +135,35 @@ a {
 
 .nav-toggle {
   display: none;
+  flex: 0 0 auto;
 
-  width: 44px;
-  height: 44px;
-
-  padding: 10px;
+  width: 48px;
+  height: 48px;
+  padding: 11px;
 
   background: transparent;
   color: #1a1a1a;
 
   border: 0;
+  border-radius: 4px;
 
   cursor: pointer;
+}
+
+.nav-toggle:hover,
+.nav-toggle:focus-visible {
+  background: #f2f2f2;
 }
 
 .nav-toggle span {
   display: block;
 
-  width: 24px;
+  width: 26px;
   height: 2px;
 
   margin: 5px auto;
 
-  background-color: currentColor;
+  background: #1a1a1a;
 
   transition:
     transform 0.2s ease,
@@ -180,10 +182,10 @@ main {
 
 
 /* ==================================================
-   MOBILE NAVIGATION
+   TABLET & MOBILE NAVIGATION
    ================================================== */
 
-@media screen and (max-width: 900px) {
+@media (max-width: 960px) {
 
   .container {
     padding-left: 24px;
@@ -195,17 +197,14 @@ main {
     gap: 20px;
   }
 
-
   /* Show hamburger */
 
   .nav-toggle {
     display: block;
-    flex: 0 0 auto;
     margin-left: auto;
   }
 
-
-  /* Hide navigation by default */
+  /* Hide desktop navigation */
 
   .main-nav {
     display: none;
@@ -222,7 +221,7 @@ main {
 
     gap: 0;
     margin: 0;
-    padding: 12px 24px 24px;
+    padding: 8px 24px 20px;
 
     background: #ffffff;
 
@@ -232,24 +231,22 @@ main {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   }
 
-
-  /* Show navigation when opened */
+  /* Open mobile navigation */
 
   .main-nav.is-open {
     display: flex;
   }
 
-
-  /* Mobile navigation links */
+  /* Mobile links */
 
   .main-nav a {
     width: 100%;
-
     padding: 14px 0;
 
     border-bottom: 1px solid #e5e5e5;
 
     font-size: 1rem;
+    white-space: normal;
   }
 
   .main-nav a:last-child {
@@ -257,7 +254,8 @@ main {
   }
 
   .main-nav a:hover,
-  .main-nav a:focus {
+  .main-nav a:focus,
+  .main-nav a.active {
     border-bottom-color: #e5e5e5;
   }
 
@@ -265,8 +263,7 @@ main {
     font-weight: 700;
   }
 
-
-  /* Hamburger → X animation */
+  /* Hamburger becomes X */
 
   .nav-toggle.is-open span:nth-child(1) {
     transform: translateY(7px) rotate(45deg);
@@ -279,7 +276,6 @@ main {
   .nav-toggle.is-open span:nth-child(3) {
     transform: translateY(-7px) rotate(-45deg);
   }
-
 }
 
 
@@ -287,7 +283,7 @@ main {
    SMALL MOBILE
    ================================================== */
 
-@media screen and (max-width: 480px) {
+@media (max-width: 480px) {
 
   .container {
     padding-left: 20px;
@@ -298,9 +294,13 @@ main {
     font-size: 1.35rem;
   }
 
+  .main-nav {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
   main {
     padding-top: 36px;
     padding-bottom: 36px;
   }
-
 }
