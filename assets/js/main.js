@@ -1,1 +1,28 @@
-document.addEventListener('DOMContentLoaded',()=>{const t=document.querySelector('.nav-toggle'),n=document.querySelector('.main-nav');if(t&&n){t.addEventListener('click',()=>{const o=n.classList.toggle('is-open');t.classList.toggle('is-open',o);t.setAttribute('aria-expanded',String(o));t.setAttribute('aria-label',o?'Close navigation':'Open navigation')})}const file=(location.pathname.split('/').pop()||'index.html').toLowerCase();document.querySelectorAll('.main-nav a[data-page]').forEach(a=>{if(a.dataset.page===file)a.classList.add('active')});});
+document.addEventListener("DOMContentLoaded", () => {
+  const navToggle = document.querySelector(".nav-toggle");
+  const mainNav = document.querySelector(".main-nav");
+
+  if (navToggle && mainNav) {
+    navToggle.addEventListener("click", () => {
+      const isOpen = mainNav.classList.toggle("is-open");
+
+      navToggle.classList.toggle("is-open", isOpen);
+      navToggle.setAttribute("aria-expanded", String(isOpen));
+      navToggle.setAttribute(
+        "aria-label",
+        isOpen ? "Close navigation" : "Open navigation"
+      );
+    });
+  }
+
+  /* Automatically mark the current page in the navigation */
+  const currentFile = (
+    location.pathname.split("/").pop() || "index.html"
+  ).toLowerCase();
+
+  document.querySelectorAll(".main-nav a[data-page]").forEach((link) => {
+    if (link.dataset.page === currentFile) {
+      link.classList.add("active");
+    }
+  });
+});
