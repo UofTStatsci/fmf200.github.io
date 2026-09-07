@@ -8,7 +8,7 @@ description: >
   University of Toronto.
 
 # Site URL
-baseurl: "/fmf200.github.io"
+baseurl: "/"
 url: "https://uoftstatsci.github.io"
 
 # Social metadata
