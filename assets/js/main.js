@@ -13,25 +13,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const mainNav = document.querySelector(".main-nav");
 
   if (navToggle && mainNav) {
-
     navToggle.addEventListener("click", () => {
-
       const isOpen = mainNav.classList.toggle("is-open");
 
       navToggle.classList.toggle("is-open", isOpen);
-
-      navToggle.setAttribute(
-        "aria-expanded",
-        String(isOpen)
-      );
-
+      navToggle.setAttribute("aria-expanded", String(isOpen));
       navToggle.setAttribute(
         "aria-label",
         isOpen ? "Close navigation" : "Open navigation"
       );
-
     });
-
   }
 
 
@@ -45,11 +36,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .querySelectorAll(".main-nav a[data-page]")
     .forEach((link) => {
-
       if (link.dataset.page === currentFile) {
         link.classList.add("active");
       }
-
     });
 
 
@@ -64,7 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const ctx = canvas.getContext("2d");
-
   const hero = canvas.closest(".hero");
 
   if (!ctx || !hero) {
@@ -83,9 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let width = 0;
   let height = 0;
   let dpr = 1;
-
   let animationFrame = null;
-
   let time = 0;
 
   const mouse = {
@@ -102,7 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
      ================================================== */
 
   function resizeCanvas() {
-
     const rect = hero.getBoundingClientRect();
 
     width = rect.width;
@@ -135,9 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
       mouse.targetX = mouse.x;
       mouse.targetY = mouse.y;
     }
-
   }
-
 
   resizeCanvas();
 
@@ -148,13 +131,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ==================================================
-     MOUSE INTERACTION
+     POINTER INTERACTION
      ================================================== */
 
   hero.addEventListener(
     "pointermove",
     (event) => {
-
       const rect = hero.getBoundingClientRect();
 
       mouse.targetX =
@@ -164,7 +146,6 @@ document.addEventListener("DOMContentLoaded", () => {
         event.clientY - rect.top;
 
       mouse.active = true;
-
     }
   );
 
@@ -172,12 +153,10 @@ document.addEventListener("DOMContentLoaded", () => {
   hero.addEventListener(
     "pointerleave",
     () => {
-
       mouse.targetX = width * 0.72;
       mouse.targetY = height * 0.5;
 
       mouse.active = false;
-
     }
   );
 
@@ -187,26 +166,25 @@ document.addEventListener("DOMContentLoaded", () => {
      ================================================== */
 
   function drawGrid() {
-
     ctx.save();
 
     ctx.strokeStyle =
-      "rgba(255, 255, 255, 0.055)";
+      "rgba(255, 255, 255, 0.06)";
 
     ctx.lineWidth = 1;
 
     const spacing = 55;
 
     /*
-      Mouse creates a very subtle parallax
-      movement in the grid.
+      Stronger parallax movement than the
+      previous version.
     */
 
     const offsetX =
-      ((mouse.x / width) - 0.5) * 12;
+      ((mouse.x / width) - 0.5) * 28;
 
     const offsetY =
-      ((mouse.y / height) - 0.5) * 12;
+      ((mouse.y / height) - 0.5) * 28;
 
 
     for (
@@ -214,7 +192,6 @@ document.addEventListener("DOMContentLoaded", () => {
       x < width + spacing;
       x += spacing
     ) {
-
       ctx.beginPath();
 
       ctx.moveTo(
@@ -228,7 +205,6 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       ctx.stroke();
-
     }
 
 
@@ -237,7 +213,6 @@ document.addEventListener("DOMContentLoaded", () => {
       y < height + spacing;
       y += spacing
     ) {
-
       ctx.beginPath();
 
       ctx.moveTo(
@@ -251,17 +226,14 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       ctx.stroke();
-
     }
 
-
     ctx.restore();
-
   }
 
 
   /* ==================================================
-     MATHEMATICAL MODEL CURVE
+     MODEL CURVE
      ================================================== */
 
   function modelCurve(
@@ -270,7 +242,6 @@ document.addEventListener("DOMContentLoaded", () => {
     amplitude,
     frequency
   ) {
-
     const normalized =
       x / width;
 
@@ -280,7 +251,6 @@ document.addEventListener("DOMContentLoaded", () => {
         phase
       ) * amplitude
     );
-
   }
 
 
@@ -292,7 +262,6 @@ document.addEventListener("DOMContentLoaded", () => {
     x,
     phase
   ) {
-
     const n =
       x / width;
 
@@ -300,42 +269,47 @@ document.addEventListener("DOMContentLoaded", () => {
       Math.sin(
         n * 10 +
         phase
-      ) * 32;
+      ) * 38;
 
     const wave2 =
       Math.sin(
         n * 23 -
         phase * 0.7
-      ) * 14;
+      ) * 18;
 
     const wave3 =
       Math.sin(
         n * 47 +
         phase * 1.4
-      ) * 6;
+      ) * 8;
+
+    const wave4 =
+      Math.sin(
+        n * 83 -
+        phase * 0.35
+      ) * 4;
 
     const trend =
-      (n - 0.5) * -55;
+      (n - 0.5) * -65;
 
     return (
       wave1 +
       wave2 +
       wave3 +
+      wave4 +
       trend
     );
-
   }
 
 
   /* ==================================================
-     MOUSE DISTORTION
+     DRAMATIC MOUSE DISTORTION
      ================================================== */
 
   function mouseInfluence(
     x,
     y
   ) {
-
     const dx =
       x - mouse.x;
 
@@ -348,21 +322,56 @@ document.addEventListener("DOMContentLoaded", () => {
         dy * dy
       );
 
-    const radius = 190;
+    /*
+      Large interaction field.
+    */
+
+    const radius = 380;
 
     if (distance > radius) {
       return 0;
     }
 
-    const strength =
+    /*
+      Strongest near the cursor,
+      fading smoothly outward.
+    */
+
+    const normalized =
       1 - distance / radius;
 
-    return (
-      dy *
-      strength *
-      0.12
-    );
+    const strength =
+      normalized * normalized;
 
+
+    /*
+      Pull the line toward the cursor.
+    */
+
+    const attraction =
+      (mouse.y - y) *
+      strength *
+      0.72;
+
+
+    /*
+      Add an elastic ripple around
+      the interaction point.
+    */
+
+    const ripple =
+      Math.sin(
+        distance * 0.035 -
+        time * 5
+      ) *
+      30 *
+      strength;
+
+
+    return (
+      attraction +
+      ripple
+    );
   }
 
 
@@ -380,7 +389,6 @@ document.addEventListener("DOMContentLoaded", () => {
     stochastic = false,
     glow = false
   }) {
-
     ctx.save();
 
     ctx.beginPath();
@@ -399,19 +407,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     if (glow) {
-
-      ctx.shadowBlur = 18;
-
-      ctx.shadowColor =
-        color;
-
+      ctx.shadowBlur = 22;
+      ctx.shadowColor = color;
     }
 
 
     const phase =
       time * speed;
 
-    const step = 5;
+    const step = 4;
 
 
     for (
@@ -419,19 +423,15 @@ document.addEventListener("DOMContentLoaded", () => {
       x <= width + 10;
       x += step
     ) {
-
       let offset;
 
       if (stochastic) {
-
         offset =
           stochasticCurve(
             x,
             phase
           );
-
       } else {
-
         offset =
           modelCurve(
             x,
@@ -439,7 +439,6 @@ document.addEventListener("DOMContentLoaded", () => {
             amplitude,
             frequency
           );
-
       }
 
 
@@ -449,8 +448,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
       /*
-        Curves gently react around
-        the mouse cursor.
+        Dramatic local distortion.
       */
 
       y += mouseInfluence(
@@ -460,28 +458,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
       if (x === -10) {
-
         ctx.moveTo(
           x,
           y
         );
-
       } else {
-
         ctx.lineTo(
           x,
           y
         );
-
       }
-
     }
 
 
     ctx.stroke();
 
     ctx.restore();
-
   }
 
 
@@ -490,38 +482,36 @@ document.addEventListener("DOMContentLoaded", () => {
      ================================================== */
 
   function drawPoints() {
-
-    const points = 18;
+    const points = 24;
 
     for (
       let i = 0;
       i < points;
       i++
     ) {
-
       const seed =
         i * 137.5;
 
       const x =
         (
           seed * 7 +
-          time * (8 + i % 4)
+          time * (10 + i % 5)
         ) %
         (width + 100) -
         50;
 
       const base =
         height * (
-          0.22 +
-          (i % 7) * 0.09
+          0.18 +
+          (i % 8) * 0.085
         );
 
-      const y =
+      let y =
         base +
         Math.sin(
-          time * 0.35 +
+          time * 0.45 +
           i * 1.7
-        ) * 22;
+        ) * 26;
 
 
       const dx =
@@ -540,13 +530,26 @@ document.addEventListener("DOMContentLoaded", () => {
       const nearMouse =
         Math.max(
           0,
-          1 - distance / 180
+          1 - distance / 260
         );
 
 
+      /*
+        Nearby particles are pulled
+        toward the pointer as well.
+      */
+
+      if (mouse.active) {
+        y +=
+          (mouse.y - y) *
+          nearMouse *
+          0.18;
+      }
+
+
       const radius =
-        1.2 +
-        nearMouse * 2.6;
+        1.3 +
+        nearMouse * 3.5;
 
 
       ctx.beginPath();
@@ -559,36 +562,88 @@ document.addEventListener("DOMContentLoaded", () => {
         Math.PI * 2
       );
 
+
       ctx.fillStyle =
         `rgba(
           110,
           205,
           255,
-          ${0.22 + nearMouse * 0.55}
+          ${0.22 + nearMouse * 0.65}
         )`;
+
+      if (nearMouse > 0.4) {
+        ctx.shadowBlur = 14;
+        ctx.shadowColor =
+          "rgba(75, 190, 255, 0.8)";
+      }
 
       ctx.fill();
 
+      ctx.shadowBlur = 0;
     }
-
   }
 
 
   /* ==================================================
-     CURSOR INDICATOR
+     CURSOR FIELD
      ================================================== */
 
-  function drawCursorIndicator() {
-
+  function drawCursorField() {
     if (!mouse.active) {
       return;
     }
 
-
     ctx.save();
 
 
-    /* vertical reference line */
+    /*
+      Large subtle interaction halo.
+    */
+
+    const gradient =
+      ctx.createRadialGradient(
+        mouse.x,
+        mouse.y,
+        0,
+        mouse.x,
+        mouse.y,
+        180
+      );
+
+    gradient.addColorStop(
+      0,
+      "rgba(50, 197, 255, 0.13)"
+    );
+
+    gradient.addColorStop(
+      0.45,
+      "rgba(50, 197, 255, 0.05)"
+    );
+
+    gradient.addColorStop(
+      1,
+      "rgba(50, 197, 255, 0)"
+    );
+
+    ctx.fillStyle =
+      gradient;
+
+    ctx.beginPath();
+
+    ctx.arc(
+      mouse.x,
+      mouse.y,
+      180,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /*
+      Vertical reference line.
+    */
 
     ctx.beginPath();
 
@@ -603,38 +658,83 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     ctx.strokeStyle =
-      "rgba(255, 255, 255, 0.12)";
+      "rgba(255, 255, 255, 0.16)";
 
     ctx.lineWidth = 1;
 
     ctx.stroke();
 
 
-    /* glowing cursor point */
+    /*
+      Horizontal reference line.
+    */
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      0,
+      mouse.y
+    );
+
+    ctx.lineTo(
+      width,
+      mouse.y
+    );
+
+    ctx.strokeStyle =
+      "rgba(255, 255, 255, 0.07)";
+
+    ctx.stroke();
+
+
+    /*
+      Outer cursor ring.
+    */
 
     ctx.beginPath();
 
     ctx.arc(
       mouse.x,
       mouse.y,
-      4,
+      13,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.strokeStyle =
+      "rgba(255, 212, 0, 0.35)";
+
+    ctx.lineWidth = 1;
+
+    ctx.stroke();
+
+
+    /*
+      Glowing cursor point.
+    */
+
+    ctx.beginPath();
+
+    ctx.arc(
+      mouse.x,
+      mouse.y,
+      4.5,
       0,
       Math.PI * 2
     );
 
     ctx.fillStyle =
-      "rgba(255, 212, 0, 0.95)";
+      "rgba(255, 212, 0, 1)";
 
-    ctx.shadowBlur = 16;
+    ctx.shadowBlur = 22;
 
     ctx.shadowColor =
-      "rgba(255, 212, 0, 0.8)";
+      "rgba(255, 212, 0, 0.95)";
 
     ctx.fill();
 
 
     ctx.restore();
-
   }
 
 
@@ -643,7 +743,6 @@ document.addEventListener("DOMContentLoaded", () => {
      ================================================== */
 
   function draw() {
-
     ctx.clearRect(
       0,
       0,
@@ -653,72 +752,95 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-      Smooth mouse movement.
+      Faster pointer response.
     */
 
     mouse.x +=
       (
         mouse.targetX -
         mouse.x
-      ) * 0.08;
+      ) * 0.16;
 
     mouse.y +=
       (
         mouse.targetY -
         mouse.y
-      ) * 0.08;
+      ) * 0.16;
 
 
     drawGrid();
 
 
     /*
-      Background mathematical curves
+      Upper model curve.
     */
 
     drawSeries({
-      baseY: height * 0.28,
-      amplitude: 44,
+      baseY: height * 0.25,
+      amplitude: 48,
       frequency: 8,
-      speed: 0.18,
+      speed: 0.22,
       color:
-        "rgba(78, 168, 235, 0.30)",
+        "rgba(78, 168, 235, 0.34)",
       width: 1.5
     });
 
 
+    /*
+      Middle model curve.
+    */
+
     drawSeries({
-      baseY: height * 0.45,
-      amplitude: 70,
+      baseY: height * 0.42,
+      amplitude: 75,
       frequency: 12,
-      speed: -0.12,
+      speed: -0.16,
       color:
-        "rgba(51, 197, 255, 0.25)",
+        "rgba(51, 197, 255, 0.30)",
+      width: 1.4
+    });
+
+
+    /*
+      Lower model curve.
+    */
+
+    drawSeries({
+      baseY: height * 0.68,
+      amplitude: 58,
+      frequency: 7,
+      speed: 0.13,
+      color:
+        "rgba(160, 211, 255, 0.22)",
       width: 1.2
     });
 
 
+    /*
+      Additional faint model curve.
+    */
+
     drawSeries({
-      baseY: height * 0.64,
-      amplitude: 50,
-      frequency: 7,
-      speed: 0.1,
+      baseY: height * 0.78,
+      amplitude: 35,
+      frequency: 16,
+      speed: -0.09,
       color:
-        "rgba(160, 211, 255, 0.18)",
+        "rgba(91, 175, 235, 0.15)",
       width: 1
     });
 
 
     /*
-      Main stochastic-like path
+      Main stochastic path.
     */
 
     drawSeries({
-      baseY: height * 0.52,
-      speed: 0.28,
+      baseY: height * 0.53,
+      speed: 0.34,
       color:
-        "rgba(64, 195, 255, 0.92)",
-      width: 2.2,
+        "rgba(64, 195, 255, 0.96)",
+      width: 2.5,
       stochastic: true,
       glow: true
     });
@@ -726,18 +848,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     drawPoints();
 
-    drawCursorIndicator();
+    drawCursorField();
 
 
     if (!reduceMotion) {
-
-      time += 0.012;
+      time += 0.014;
 
       animationFrame =
         requestAnimationFrame(draw);
-
     }
-
   }
 
 
@@ -748,13 +867,11 @@ document.addEventListener("DOMContentLoaded", () => {
   draw();
 
 
-  /*
-    If reduced motion is enabled,
-    redraw only when the user interacts.
-  */
+  /* ==================================================
+     REDUCED MOTION
+     ================================================== */
 
   if (reduceMotion) {
-
     hero.addEventListener(
       "pointermove",
       draw
@@ -764,7 +881,6 @@ document.addEventListener("DOMContentLoaded", () => {
       "resize",
       draw
     );
-
   }
 
 
@@ -775,13 +891,11 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener(
     "beforeunload",
     () => {
-
       if (animationFrame) {
         cancelAnimationFrame(
           animationFrame
         );
       }
-
     }
   );
 
