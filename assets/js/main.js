@@ -1,6 +1,7 @@
 /* ==================================================
    FMF200
    Interactive Mathematical Finance Hero
+   Prism Convergence Effect
    ================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -57,54 +58,49 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!ctx || !hero) return;
 
 
-  /* ==================================================
-     STATE
-     ================================================== */
-
   let width = 0;
   let height = 0;
   let dpr = 1;
 
-  let animationFrame = null;
+  let series = [];
+
 
   const mouse = {
     x: 0,
     y: 0,
-    targetX: 0,
-    targetY: 0,
-    active: false,
-    strength: 0
+    active: false
   };
 
 
   /* ==================================================
-     SERIES DEFINITIONS
+     SERIES
      ================================================== */
 
   const seriesDefinitions = [
+
     {
       seed: 17,
-      base: 0.22,
-      volatility: 0.055,
+      base: 0.20,
+      volatility: 0.045,
       trend: 0.08,
-      color: "rgba(81,174,240,0.30)",
+      color: "rgba(81,174,240,0.34)",
       lineWidth: 1.3
     },
 
     {
       seed: 31,
-      base: 0.36,
-      volatility: 0.07,
-      trend: -0.03,
-      color: "rgba(61,196,255,0.42)",
+      base: 0.34,
+      volatility: 0.055,
+      trend: -0.025,
+      color: "rgba(61,196,255,0.48)",
       lineWidth: 1.5
     },
 
     {
       seed: 49,
-      base: 0.52,
-      volatility: 0.085,
-      trend: 0.06,
+      base: 0.50,
+      volatility: 0.065,
+      trend: 0.055,
       color: "rgba(74,201,255,0.95)",
       lineWidth: 2.4,
       glow: true
@@ -113,24 +109,22 @@ document.addEventListener("DOMContentLoaded", () => {
     {
       seed: 73,
       base: 0.66,
-      volatility: 0.065,
-      trend: -0.05,
-      color: "rgba(151,211,255,0.28)",
+      volatility: 0.05,
+      trend: -0.04,
+      color: "rgba(151,211,255,0.32)",
       lineWidth: 1.2
     },
 
     {
       seed: 101,
-      base: 0.78,
-      volatility: 0.05,
+      base: 0.79,
+      volatility: 0.04,
       trend: 0.025,
-      color: "rgba(97,177,235,0.20)",
+      color: "rgba(97,177,235,0.24)",
       lineWidth: 1
     }
+
   ];
-
-
-  let series = [];
 
 
   /* ==================================================
@@ -138,35 +132,38 @@ document.addEventListener("DOMContentLoaded", () => {
      ================================================== */
 
   function seededRandom(seed) {
+
     const value =
       Math.sin(seed * 12.9898) *
       43758.5453;
 
     return value - Math.floor(value);
+
   }
 
 
   /* ==================================================
-     BUILD STATIC PRICE PATHS
+     BUILD STATIC FINANCIAL PATHS
      ================================================== */
 
   function buildSeries() {
 
     series = [];
 
+
     seriesDefinitions.forEach((definition) => {
 
       const points = [];
 
       /*
-        More points = more realistic financial
-        time-series geometry.
+        Fairly dense angular path.
       */
 
-      const segments = 52;
+      const segments = 64;
 
       const stepX =
         width / segments;
+
 
       let y =
         height * definition.base;
@@ -191,50 +188,47 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
 
-          /*
-            Mostly small moves with occasional
-            larger jumps.
-          */
-
           let move =
             (random - 0.5) *
             height *
             definition.volatility;
 
 
-          const jumpChance =
+          /*
+            Occasional larger price move.
+          */
+
+          const jump =
             seededRandom(
-              definition.seed * 2000 +
-              i * 91
+              definition.seed * 3000 +
+              i * 79
             );
 
 
-          if (jumpChance > 0.91) {
+          if (jump > 0.94) {
 
-            const jumpDirection =
+            const direction =
               seededRandom(
-                definition.seed +
-                i * 151
+                definition.seed * 5000 +
+                i * 131
               ) > 0.5
                 ? 1
                 : -1;
 
 
             move +=
-              jumpDirection *
+              direction *
               height *
               definition.volatility *
               0.8;
+
           }
 
 
           y += move;
+
         }
 
-
-        /*
-          Gradual directional trend.
-        */
 
         const trend =
           definition.trend *
@@ -242,25 +236,25 @@ document.addEventListener("DOMContentLoaded", () => {
           (i / segments);
 
 
-        /*
-          Keep the chart reasonably
-          contained inside the hero.
-        */
-
         const finalY =
           Math.max(
-            45,
+            40,
             Math.min(
-              height - 45,
+              height - 40,
               y + trend
             )
           );
 
 
+        /*
+          These coordinates NEVER change.
+        */
+
         points.push({
           x,
           y: finalY
         });
+
       }
 
 
@@ -283,6 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const rect =
       hero.getBoundingClientRect();
 
+
     width =
       rect.width;
 
@@ -301,6 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Math.round(
         width * dpr
       );
+
 
     canvas.height =
       Math.round(
@@ -341,7 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ==================================================
-     POINTER EVENTS
+     POINTER
      ================================================== */
 
   hero.addEventListener(
@@ -356,21 +352,15 @@ document.addEventListener("DOMContentLoaded", () => {
         event.clientX -
         rect.left;
 
+
       mouse.y =
         event.clientY -
         rect.top;
 
 
-      mouse.targetX =
-        mouse.x;
-
-      mouse.targetY =
-        mouse.y;
-
-
       mouse.active = true;
 
-      startAnimation();
+      draw();
 
     }
   );
@@ -384,18 +374,19 @@ document.addEventListener("DOMContentLoaded", () => {
         hero.getBoundingClientRect();
 
 
-      mouse.targetX =
+      mouse.x =
         event.clientX -
         rect.left;
 
-      mouse.targetY =
+
+      mouse.y =
         event.clientY -
         rect.top;
 
 
       mouse.active = true;
 
-      startAnimation();
+      draw();
 
     }
   );
@@ -407,10 +398,153 @@ document.addEventListener("DOMContentLoaded", () => {
 
       mouse.active = false;
 
-      startAnimation();
+      /*
+        Immediately restore the original
+        separated plots.
+      */
+
+      draw();
 
     }
   );
+
+
+  /* ==================================================
+     PRISM / FOCAL DISTORTION
+     ================================================== */
+
+  function distortPoint(
+    point,
+    seriesIndex
+  ) {
+
+    if (!mouse.active) {
+      return point;
+    }
+
+
+    /*
+      Horizontal distance from focal point.
+    */
+
+    const dx =
+      point.x -
+      mouse.x;
+
+
+    /*
+      Controls how wide the prism/funnel is.
+
+      Larger value = longer convergence and
+      divergence region.
+    */
+
+    const radius =
+      Math.min(
+        430,
+        width * 0.38
+      );
+
+
+    const distance =
+      Math.abs(dx);
+
+
+    if (distance >= radius) {
+      return point;
+    }
+
+
+    /*
+      0 at outside edge
+      1 at cursor
+    */
+
+    const normalized =
+      1 -
+      distance / radius;
+
+
+    /*
+      Smooth focal shape.
+
+      This produces:
+      separate
+          \
+           \
+            • cursor
+           /
+          /
+      separate
+    */
+
+    const convergence =
+      Math.pow(
+        normalized,
+        2.15
+      );
+
+
+    /*
+      Very small separation between lines
+      at the exact focal point.
+
+      0 would make them perfectly overlap.
+    */
+
+    const focalSpread = 1.7;
+
+
+    const seriesOffset =
+      (
+        seriesIndex -
+        (series.length - 1) / 2
+      ) *
+      focalSpread;
+
+
+    const focalY =
+      mouse.y +
+      seriesOffset;
+
+
+    /*
+      Interpolate ORIGINAL Y toward cursor.
+
+      Crucially, point.y itself is never changed.
+    */
+
+    const distortedY =
+      point.y +
+      (
+        focalY -
+        point.y
+      ) *
+      convergence *
+      0.995;
+
+
+    /*
+      Very subtle horizontal pull creates
+      a more pronounced optical funnel.
+    */
+
+    const distortedX =
+      point.x +
+      (
+        mouse.x -
+        point.x
+      ) *
+      convergence *
+      0.018;
+
+
+    return {
+      x: distortedX,
+      y: distortedY
+    };
+
+  }
 
 
   /* ==================================================
@@ -427,6 +561,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     ctx.lineWidth = 1;
+
 
     ctx.strokeStyle =
       "rgba(255,255,255,0.055)";
@@ -484,119 +619,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ==================================================
-     CURSOR CONVERGENCE
-     ================================================== */
-
-  function distortPoint(
-    point,
-    seriesIndex
-  ) {
-
-    if (mouse.strength <= 0.001) {
-      return point;
-    }
-
-
-    /*
-      Only points within this horizontal
-      region are affected.
-    */
-
-    const radius =
-      Math.min(
-        430,
-        width * 0.38
-      );
-
-
-    const dx =
-      point.x -
-      mouse.x;
-
-
-    const distance =
-      Math.abs(dx);
-
-
-    if (distance > radius) {
-      return point;
-    }
-
-
-    /*
-      Smooth falloff toward the cursor.
-    */
-
-    const normalized =
-      1 -
-      distance / radius;
-
-
-    /*
-      Very strong convergence close
-      to the cursor.
-    */
-
-    const attraction =
-      Math.pow(
-        normalized,
-        2.2
-      ) *
-      mouse.strength;
-
-
-    /*
-      Tiny vertical separation keeps
-      all five lines visible while
-      appearing to converge.
-    */
-
-    const separation =
-      (
-        seriesIndex -
-        (series.length - 1) / 2
-      ) * 2.2;
-
-
-    const targetY =
-      mouse.y +
-      separation;
-
-
-    const newY =
-      point.y +
-      (
-        targetY -
-        point.y
-      ) *
-      attraction *
-      0.985;
-
-
-    /*
-      Slight horizontal pull creates
-      a funnel shape.
-    */
-
-    const newX =
-      point.x +
-      (
-        mouse.x -
-        point.x
-      ) *
-      attraction *
-      0.035;
-
-
-    return {
-      x: newX,
-      y: newY
-    };
-
-  }
-
-
-  /* ==================================================
      DRAW SERIES
      ================================================== */
 
@@ -607,23 +629,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ctx.save();
 
+
     ctx.beginPath();
 
 
     ctx.strokeStyle =
       item.color;
 
+
     ctx.lineWidth =
       item.lineWidth;
 
 
     /*
-      Sharp joins reinforce the
-      financial-chart appearance.
+      Angular financial plot.
     */
 
     ctx.lineJoin =
       "miter";
+
 
     ctx.lineCap =
       "butt";
@@ -632,6 +656,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (item.glow) {
 
       ctx.shadowBlur = 14;
+
 
       ctx.shadowColor =
         "rgba(64,195,255,0.75)";
@@ -642,7 +667,7 @@ document.addEventListener("DOMContentLoaded", () => {
     item.points.forEach(
       (point, index) => {
 
-        const distorted =
+        const rendered =
           distortPoint(
             point,
             seriesIndex
@@ -652,15 +677,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (index === 0) {
 
           ctx.moveTo(
-            distorted.x,
-            distorted.y
+            rendered.x,
+            rendered.y
           );
 
         } else {
 
           ctx.lineTo(
-            distorted.x,
-            distorted.y
+            rendered.x,
+            rendered.y
           );
 
         }
@@ -671,21 +696,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ctx.stroke();
 
+
     ctx.restore();
 
   }
 
 
   /* ==================================================
-     CURSOR
+     FOCAL POINT
      ================================================== */
 
   function drawCursor() {
 
-    if (
-      mouse.strength <
-      0.01
-    ) {
+    if (!mouse.active) {
       return;
     }
 
@@ -699,10 +722,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ctx.beginPath();
 
+
     ctx.moveTo(
       mouse.x,
       0
     );
+
 
     ctx.lineTo(
       mouse.x,
@@ -711,28 +736,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     ctx.strokeStyle =
-      `rgba(
-        255,
-        255,
-        255,
-        ${0.16 * mouse.strength}
-      )`;
+      "rgba(255,255,255,0.14)";
+
 
     ctx.lineWidth = 1;
+
 
     ctx.stroke();
 
 
     /*
-      Horizontal reference line.
+      Horizontal reference.
     */
 
     ctx.beginPath();
+
 
     ctx.moveTo(
       0,
       mouse.y
     );
+
 
     ctx.lineTo(
       width,
@@ -741,18 +765,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     ctx.strokeStyle =
-      `rgba(
-        255,
-        255,
-        255,
-        ${0.07 * mouse.strength}
-      )`;
+      "rgba(255,255,255,0.06)";
+
 
     ctx.stroke();
 
 
     /*
-      Cursor halo.
+      Soft focal halo.
     */
 
     const gradient =
@@ -762,18 +782,13 @@ document.addEventListener("DOMContentLoaded", () => {
         0,
         mouse.x,
         mouse.y,
-        130
+        120
       );
 
 
     gradient.addColorStop(
       0,
-      `rgba(
-        61,
-        197,
-        255,
-        ${0.13 * mouse.strength}
-      )`
+      "rgba(61,197,255,0.14)"
     );
 
 
@@ -789,13 +804,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ctx.beginPath();
 
+
     ctx.arc(
       mouse.x,
       mouse.y,
-      130,
+      120,
       0,
       Math.PI * 2
     );
+
 
     ctx.fill();
 
@@ -805,6 +822,7 @@ document.addEventListener("DOMContentLoaded", () => {
     */
 
     ctx.beginPath();
+
 
     ctx.arc(
       mouse.x,
@@ -816,21 +834,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     ctx.fillStyle =
-      `rgba(
-        255,
-        212,
-        0,
-        ${mouse.strength}
-      )`;
+      "#ffd400";
 
 
     ctx.shadowBlur = 22;
+
 
     ctx.shadowColor =
       "rgba(255,212,0,0.9)";
 
 
     ctx.fill();
+
+
+    /*
+      Small outer ring.
+    */
+
+    ctx.shadowBlur = 0;
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+      mouse.x,
+      mouse.y,
+      12,
+      0,
+      Math.PI * 2
+    );
+
+
+    ctx.strokeStyle =
+      "rgba(255,212,0,0.35)";
+
+
+    ctx.stroke();
 
 
     ctx.restore();
@@ -873,147 +913,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ==================================================
-     INTERACTION ANIMATION
-     ================================================== */
-
-  function animate() {
-
-    /*
-      Cursor follows the real pointer
-      with a slight easing effect.
-    */
-
-    mouse.x +=
-      (
-        mouse.targetX -
-        mouse.x
-      ) * 0.24;
-
-
-    mouse.y +=
-      (
-        mouse.targetY -
-        mouse.y
-      ) * 0.24;
-
-
-    /*
-      Fade interaction strength in/out.
-    */
-
-    const targetStrength =
-      mouse.active
-        ? 1
-        : 0;
-
-
-    mouse.strength +=
-      (
-        targetStrength -
-        mouse.strength
-      ) * 0.12;
-
-
-    draw();
-
-
-    /*
-      Stop animation completely once
-      everything has returned to rest.
-    */
-
-    const pointerSettled =
-      Math.abs(
-        mouse.targetX -
-        mouse.x
-      ) < 0.1 &&
-      Math.abs(
-        mouse.targetY -
-        mouse.y
-      ) < 0.1;
-
-
-    const strengthSettled =
-      mouse.active
-        ? Math.abs(
-            1 -
-            mouse.strength
-          ) < 0.002
-        : mouse.strength < 0.002;
-
-
-    if (
-      pointerSettled &&
-      strengthSettled
-    ) {
-
-      if (!mouse.active) {
-
-        mouse.strength = 0;
-
-        draw();
-
-      }
-
-
-      animationFrame = null;
-
-      return;
-
-    }
-
-
-    animationFrame =
-      requestAnimationFrame(
-        animate
-      );
-
-  }
-
-
-  /* ==================================================
-     START ANIMATION ONLY WHEN NEEDED
-     ================================================== */
-
-  function startAnimation() {
-
-    if (animationFrame !== null) {
-      return;
-    }
-
-
-    animationFrame =
-      requestAnimationFrame(
-        animate
-      );
-
-  }
-
-
-  /* ==================================================
      INITIAL STATIC DRAW
      ================================================== */
 
   draw();
-
-
-  /* ==================================================
-     CLEANUP
-     ================================================== */
-
-  window.addEventListener(
-    "beforeunload",
-    () => {
-
-      if (animationFrame) {
-
-        cancelAnimationFrame(
-          animationFrame
-        );
-
-      }
-
-    }
-  );
 
 });
