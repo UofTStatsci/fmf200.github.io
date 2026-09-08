@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ==================================================
-     CANVAS SETUP
+     CANVAS
      ================================================== */
 
   const canvas = document.getElementById("finance-canvas");
@@ -56,16 +56,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!ctx || !hero) return;
 
+
+  /* ==================================================
+     STATE
+     ================================================== */
+
   let width = 0;
   let height = 0;
   let dpr = 1;
 
-  let series = [];
+  let animationFrame = null;
 
   const mouse = {
     x: 0,
     y: 0,
-    active: false
+    targetX: 0,
+    targetY: 0,
+    active: false,
+    strength: 0
   };
 
 
@@ -76,27 +84,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const seriesDefinitions = [
     {
       seed: 17,
-      base: 0.20,
-      volatility: 0.045,
+      base: 0.22,
+      volatility: 0.055,
       trend: 0.08,
-      color: "rgba(81,174,240,0.32)",
+      color: "rgba(81,174,240,0.30)",
       lineWidth: 1.3
     },
 
     {
       seed: 31,
-      base: 0.34,
-      volatility: 0.055,
-      trend: -0.025,
-      color: "rgba(61,196,255,0.44)",
+      base: 0.36,
+      volatility: 0.07,
+      trend: -0.03,
+      color: "rgba(61,196,255,0.42)",
       lineWidth: 1.5
     },
 
     {
       seed: 49,
-      base: 0.50,
-      volatility: 0.065,
-      trend: 0.055,
+      base: 0.52,
+      volatility: 0.085,
+      trend: 0.06,
       color: "rgba(74,201,255,0.95)",
       lineWidth: 2.4,
       glow: true
@@ -105,21 +113,24 @@ document.addEventListener("DOMContentLoaded", () => {
     {
       seed: 73,
       base: 0.66,
-      volatility: 0.05,
-      trend: -0.04,
-      color: "rgba(151,211,255,0.30)",
+      volatility: 0.065,
+      trend: -0.05,
+      color: "rgba(151,211,255,0.28)",
       lineWidth: 1.2
     },
 
     {
       seed: 101,
-      base: 0.79,
-      volatility: 0.04,
+      base: 0.78,
+      volatility: 0.05,
       trend: 0.025,
-      color: "rgba(97,177,235,0.22)",
+      color: "rgba(97,177,235,0.20)",
       lineWidth: 1
     }
   ];
+
+
+  let series = [];
 
 
   /* ==================================================
@@ -136,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ==================================================
-     CREATE STATIC PRICE PATHS
+     BUILD STATIC PRICE PATHS
      ================================================== */
 
   function buildSeries() {
@@ -147,14 +158,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const points = [];
 
-      const segments = 58;
-      const stepX = width / segments;
+      /*
+        More points = more realistic financial
+        time-series geometry.
+      */
+
+      const segments = 52;
+
+      const stepX =
+        width / segments;
 
       let y =
         height * definition.base;
 
 
-      for (let i = 0; i <= segments; i++) {
+      for (
+        let i = 0;
+        i <= segments;
+        i++
+      ) {
 
         const x =
           i * stepX;
@@ -170,7 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
           /*
-            Small irregular price movements.
+            Mostly small moves with occasional
+            larger jumps.
           */
 
           let move =
@@ -179,33 +202,29 @@ document.addEventListener("DOMContentLoaded", () => {
             definition.volatility;
 
 
-          /*
-            Occasional sharper move.
-          */
-
-          const jump =
+          const jumpChance =
             seededRandom(
-              definition.seed * 3000 +
-              i * 79
+              definition.seed * 2000 +
+              i * 91
             );
 
 
-          if (jump > 0.93) {
+          if (jumpChance > 0.91) {
 
-            const direction =
+            const jumpDirection =
               seededRandom(
-                definition.seed * 5000 +
-                i * 131
+                definition.seed +
+                i * 151
               ) > 0.5
                 ? 1
                 : -1;
 
 
             move +=
-              direction *
+              jumpDirection *
               height *
               definition.volatility *
-              0.75;
+              0.8;
           }
 
 
@@ -213,32 +232,33 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
+        /*
+          Gradual directional trend.
+        */
+
         const trend =
           definition.trend *
           height *
           (i / segments);
 
 
+        /*
+          Keep the chart reasonably
+          contained inside the hero.
+        */
+
         const finalY =
           Math.max(
-            40,
+            45,
             Math.min(
-              height - 40,
+              height - 45,
               y + trend
             )
           );
 
 
         points.push({
-          originalX: x,
-          originalY: finalY,
-
-          /*
-            Current position can be permanently
-            altered by cursor interaction.
-          */
-
-          x: x,
+          x,
           y: finalY
         });
       }
@@ -305,11 +325,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
 
-    /*
-      Rebuild only when the browser dimensions
-      actually change.
-    */
-
     buildSeries();
 
     draw();
@@ -326,7 +341,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ==================================================
-     POINTER INTERACTION
+     POINTER EVENTS
      ================================================== */
 
   hero.addEventListener(
@@ -336,6 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const rect =
         hero.getBoundingClientRect();
 
+
       mouse.x =
         event.clientX -
         rect.left;
@@ -344,10 +360,17 @@ document.addEventListener("DOMContentLoaded", () => {
         event.clientY -
         rect.top;
 
+
+      mouse.targetX =
+        mouse.x;
+
+      mouse.targetY =
+        mouse.y;
+
+
       mouse.active = true;
 
-      updateSeries();
-      draw();
+      startAnimation();
 
     }
   );
@@ -360,18 +383,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const rect =
         hero.getBoundingClientRect();
 
-      mouse.x =
+
+      mouse.targetX =
         event.clientX -
         rect.left;
 
-      mouse.y =
+      mouse.targetY =
         event.clientY -
         rect.top;
 
+
       mouse.active = true;
 
-      updateSeries();
-      draw();
+      startAnimation();
 
     }
   );
@@ -381,128 +405,12 @@ document.addEventListener("DOMContentLoaded", () => {
     "pointerleave",
     () => {
 
-      /*
-        Do NOT reset the lines.
-
-        Their current positions remain exactly
-        where the last cursor interaction left them.
-      */
-
       mouse.active = false;
 
-      draw();
+      startAnimation();
 
     }
   );
-
-
-  /* ==================================================
-     MOVE SERIES TOWARD CURSOR
-     ================================================== */
-
-  function updateSeries() {
-
-    if (!mouse.active) return;
-
-
-    /*
-      Wide region around the cursor is affected.
-    */
-
-    const radius =
-      Math.min(
-        440,
-        width * 0.40
-      );
-
-
-    series.forEach(
-      (item, seriesIndex) => {
-
-        item.points.forEach((point) => {
-
-          const dx =
-            point.x -
-            mouse.x;
-
-
-          const distance =
-            Math.abs(dx);
-
-
-          if (distance > radius) {
-            return;
-          }
-
-
-          /*
-            Strong nonlinear convergence.
-          */
-
-          const normalized =
-            1 -
-            distance / radius;
-
-
-          const attraction =
-            Math.pow(
-              normalized,
-              2.1
-            );
-
-
-          /*
-            Tiny separation keeps individual
-            lines visible at the focal point.
-          */
-
-          const separation =
-            (
-              seriesIndex -
-              (series.length - 1) / 2
-            ) * 2;
-
-
-          const targetY =
-            mouse.y +
-            separation;
-
-
-          /*
-            Pull toward cursor.
-
-            Because we're changing point.y itself,
-            the new shape persists after the
-            cursor leaves.
-          */
-
-          point.y +=
-            (
-              targetY -
-              point.y
-            ) *
-            attraction *
-            0.72;
-
-
-          /*
-            Slight horizontal convergence.
-          */
-
-          point.x +=
-            (
-              mouse.x -
-              point.x
-            ) *
-            attraction *
-            0.025;
-
-        });
-
-      }
-    );
-
-  }
 
 
   /* ==================================================
@@ -513,8 +421,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ctx.save();
 
+
     const spacingX = 65;
     const spacingY = 55;
+
 
     ctx.lineWidth = 1;
 
@@ -574,10 +484,126 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ==================================================
+     CURSOR CONVERGENCE
+     ================================================== */
+
+  function distortPoint(
+    point,
+    seriesIndex
+  ) {
+
+    if (mouse.strength <= 0.001) {
+      return point;
+    }
+
+
+    /*
+      Only points within this horizontal
+      region are affected.
+    */
+
+    const radius =
+      Math.min(
+        430,
+        width * 0.38
+      );
+
+
+    const dx =
+      point.x -
+      mouse.x;
+
+
+    const distance =
+      Math.abs(dx);
+
+
+    if (distance > radius) {
+      return point;
+    }
+
+
+    /*
+      Smooth falloff toward the cursor.
+    */
+
+    const normalized =
+      1 -
+      distance / radius;
+
+
+    /*
+      Very strong convergence close
+      to the cursor.
+    */
+
+    const attraction =
+      Math.pow(
+        normalized,
+        2.2
+      ) *
+      mouse.strength;
+
+
+    /*
+      Tiny vertical separation keeps
+      all five lines visible while
+      appearing to converge.
+    */
+
+    const separation =
+      (
+        seriesIndex -
+        (series.length - 1) / 2
+      ) * 2.2;
+
+
+    const targetY =
+      mouse.y +
+      separation;
+
+
+    const newY =
+      point.y +
+      (
+        targetY -
+        point.y
+      ) *
+      attraction *
+      0.985;
+
+
+    /*
+      Slight horizontal pull creates
+      a funnel shape.
+    */
+
+    const newX =
+      point.x +
+      (
+        mouse.x -
+        point.x
+      ) *
+      attraction *
+      0.035;
+
+
+    return {
+      x: newX,
+      y: newY
+    };
+
+  }
+
+
+  /* ==================================================
      DRAW SERIES
      ================================================== */
 
-  function drawSeries(item) {
+  function drawSeries(
+    item,
+    seriesIndex
+  ) {
 
     ctx.save();
 
@@ -592,7 +618,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-      Sharp angular geometry.
+      Sharp joins reinforce the
+      financial-chart appearance.
     */
 
     ctx.lineJoin =
@@ -615,18 +642,25 @@ document.addEventListener("DOMContentLoaded", () => {
     item.points.forEach(
       (point, index) => {
 
+        const distorted =
+          distortPoint(
+            point,
+            seriesIndex
+          );
+
+
         if (index === 0) {
 
           ctx.moveTo(
-            point.x,
-            point.y
+            distorted.x,
+            distorted.y
           );
 
         } else {
 
           ctx.lineTo(
-            point.x,
-            point.y
+            distorted.x,
+            distorted.y
           );
 
         }
@@ -643,12 +677,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ==================================================
-     CURSOR FOCUS
+     CURSOR
      ================================================== */
 
   function drawCursor() {
 
-    if (!mouse.active) {
+    if (
+      mouse.strength <
+      0.01
+    ) {
       return;
     }
 
@@ -657,7 +694,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-      Vertical time marker.
+      Vertical reference line.
     */
 
     ctx.beginPath();
@@ -674,7 +711,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     ctx.strokeStyle =
-      "rgba(255,255,255,0.16)";
+      `rgba(
+        255,
+        255,
+        255,
+        ${0.16 * mouse.strength}
+      )`;
 
     ctx.lineWidth = 1;
 
@@ -682,7 +724,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-      Horizontal value marker.
+      Horizontal reference line.
     */
 
     ctx.beginPath();
@@ -699,13 +741,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     ctx.strokeStyle =
-      "rgba(255,255,255,0.07)";
+      `rgba(
+        255,
+        255,
+        255,
+        ${0.07 * mouse.strength}
+      )`;
 
     ctx.stroke();
 
 
     /*
-      Interaction halo.
+      Cursor halo.
     */
 
     const gradient =
@@ -721,7 +768,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     gradient.addColorStop(
       0,
-      "rgba(61,197,255,0.13)"
+      `rgba(
+        61,
+        197,
+        255,
+        ${0.13 * mouse.strength}
+      )`
     );
 
 
@@ -749,7 +801,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-      Focal point.
+      Yellow focal point.
     */
 
     ctx.beginPath();
@@ -764,7 +816,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     ctx.fillStyle =
-      "rgba(255,212,0,1)";
+      `rgba(
+        255,
+        212,
+        0,
+        ${mouse.strength}
+      )`;
 
 
     ctx.shadowBlur = 22;
@@ -799,7 +856,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     series.forEach(
-      drawSeries
+      (item, index) => {
+
+        drawSeries(
+          item,
+          index
+        );
+
+      }
     );
 
 
@@ -809,9 +873,147 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ==================================================
+     INTERACTION ANIMATION
+     ================================================== */
+
+  function animate() {
+
+    /*
+      Cursor follows the real pointer
+      with a slight easing effect.
+    */
+
+    mouse.x +=
+      (
+        mouse.targetX -
+        mouse.x
+      ) * 0.24;
+
+
+    mouse.y +=
+      (
+        mouse.targetY -
+        mouse.y
+      ) * 0.24;
+
+
+    /*
+      Fade interaction strength in/out.
+    */
+
+    const targetStrength =
+      mouse.active
+        ? 1
+        : 0;
+
+
+    mouse.strength +=
+      (
+        targetStrength -
+        mouse.strength
+      ) * 0.12;
+
+
+    draw();
+
+
+    /*
+      Stop animation completely once
+      everything has returned to rest.
+    */
+
+    const pointerSettled =
+      Math.abs(
+        mouse.targetX -
+        mouse.x
+      ) < 0.1 &&
+      Math.abs(
+        mouse.targetY -
+        mouse.y
+      ) < 0.1;
+
+
+    const strengthSettled =
+      mouse.active
+        ? Math.abs(
+            1 -
+            mouse.strength
+          ) < 0.002
+        : mouse.strength < 0.002;
+
+
+    if (
+      pointerSettled &&
+      strengthSettled
+    ) {
+
+      if (!mouse.active) {
+
+        mouse.strength = 0;
+
+        draw();
+
+      }
+
+
+      animationFrame = null;
+
+      return;
+
+    }
+
+
+    animationFrame =
+      requestAnimationFrame(
+        animate
+      );
+
+  }
+
+
+  /* ==================================================
+     START ANIMATION ONLY WHEN NEEDED
+     ================================================== */
+
+  function startAnimation() {
+
+    if (animationFrame !== null) {
+      return;
+    }
+
+
+    animationFrame =
+      requestAnimationFrame(
+        animate
+      );
+
+  }
+
+
+  /* ==================================================
      INITIAL STATIC DRAW
      ================================================== */
 
   draw();
+
+
+  /* ==================================================
+     CLEANUP
+     ================================================== */
+
+  window.addEventListener(
+    "beforeunload",
+    () => {
+
+      if (animationFrame) {
+
+        cancelAnimationFrame(
+          animationFrame
+        );
+
+      }
+
+    }
+  );
 
 });
