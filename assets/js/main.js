@@ -1,7 +1,7 @@
 /* ==================================================
    FMF200
    Interactive Mathematical Finance Hero
-   Prism Convergence Effect
+   Smooth Prism Convergence Effect
    ================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -64,11 +64,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let series = [];
 
+  let animationFrame = null;
+
 
   const mouse = {
     x: 0,
     y: 0,
-    active: false
+    active: false,
+
+    /*
+      0 = original plots
+      1 = full cursor convergence
+    */
+
+    strength: 0,
+    targetStrength: 0
   };
 
 
@@ -155,10 +165,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const points = [];
 
-      /*
-        Fairly dense angular path.
-      */
-
       const segments = 64;
 
       const stepX =
@@ -193,10 +199,6 @@ document.addEventListener("DOMContentLoaded", () => {
             height *
             definition.volatility;
 
-
-          /*
-            Occasional larger price move.
-          */
 
           const jump =
             seededRandom(
@@ -245,10 +247,6 @@ document.addEventListener("DOMContentLoaded", () => {
             )
           );
 
-
-        /*
-          These coordinates NEVER change.
-        */
 
         points.push({
           x,
@@ -360,7 +358,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       mouse.active = true;
 
-      draw();
+      mouse.targetStrength = 1;
+
+      startAnimation();
 
     }
   );
@@ -386,6 +386,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       mouse.active = true;
 
+      mouse.targetStrength = 1;
+
+      /*
+        Draw immediately so the prism
+        follows the cursor responsively.
+      */
+
       draw();
 
     }
@@ -399,11 +406,13 @@ document.addEventListener("DOMContentLoaded", () => {
       mouse.active = false;
 
       /*
-        Immediately restore the original
-        separated plots.
+        Instead of snapping back,
+        gradually ease strength to zero.
       */
 
-      draw();
+      mouse.targetStrength = 0;
+
+      startAnimation();
 
     }
   );
@@ -418,26 +427,15 @@ document.addEventListener("DOMContentLoaded", () => {
     seriesIndex
   ) {
 
-    if (!mouse.active) {
+    if (mouse.strength <= 0.001) {
       return point;
     }
 
-
-    /*
-      Horizontal distance from focal point.
-    */
 
     const dx =
       point.x -
       mouse.x;
 
-
-    /*
-      Controls how wide the prism/funnel is.
-
-      Larger value = longer convergence and
-      divergence region.
-    */
 
     const radius =
       Math.min(
@@ -455,41 +453,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /*
-      0 at outside edge
-      1 at cursor
-    */
-
     const normalized =
       1 -
       distance / radius;
 
 
     /*
-      Smooth focal shape.
-
-      This produces:
-      separate
-          \
-           \
-            • cursor
-           /
-          /
-      separate
+      Prism-shaped convergence.
     */
 
     const convergence =
       Math.pow(
         normalized,
         2.15
-      );
+      ) *
+      mouse.strength;
 
 
     /*
-      Very small separation between lines
-      at the exact focal point.
-
-      0 would make them perfectly overlap.
+      Tiny separation at the focal point.
     */
 
     const focalSpread = 1.7;
@@ -508,12 +490,6 @@ document.addEventListener("DOMContentLoaded", () => {
       seriesOffset;
 
 
-    /*
-      Interpolate ORIGINAL Y toward cursor.
-
-      Crucially, point.y itself is never changed.
-    */
-
     const distortedY =
       point.y +
       (
@@ -523,11 +499,6 @@ document.addEventListener("DOMContentLoaded", () => {
       convergence *
       0.995;
 
-
-    /*
-      Very subtle horizontal pull creates
-      a more pronounced optical funnel.
-    */
 
     const distortedX =
       point.x +
@@ -641,10 +612,6 @@ document.addEventListener("DOMContentLoaded", () => {
       item.lineWidth;
 
 
-    /*
-      Angular financial plot.
-    */
-
     ctx.lineJoin =
       "miter";
 
@@ -708,7 +675,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function drawCursor() {
 
-    if (!mouse.active) {
+    if (mouse.strength <= 0.01) {
       return;
     }
 
@@ -736,7 +703,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     ctx.strokeStyle =
-      "rgba(255,255,255,0.14)";
+      `rgba(
+        255,
+        255,
+        255,
+        ${0.14 * mouse.strength}
+      )`;
 
 
     ctx.lineWidth = 1;
@@ -765,14 +737,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     ctx.strokeStyle =
-      "rgba(255,255,255,0.06)";
+      `rgba(
+        255,
+        255,
+        255,
+        ${0.06 * mouse.strength}
+      )`;
 
 
     ctx.stroke();
 
 
     /*
-      Soft focal halo.
+      Halo.
     */
 
     const gradient =
@@ -788,7 +765,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     gradient.addColorStop(
       0,
-      "rgba(61,197,255,0.14)"
+      `rgba(
+        61,
+        197,
+        255,
+        ${0.14 * mouse.strength}
+      )`
     );
 
 
@@ -834,10 +816,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     ctx.fillStyle =
-      "#ffd400";
+      `rgba(
+        255,
+        212,
+        0,
+        ${mouse.strength}
+      )`;
 
 
-    ctx.shadowBlur = 22;
+    ctx.shadowBlur =
+      22 * mouse.strength;
 
 
     ctx.shadowColor =
@@ -848,7 +836,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-      Small outer ring.
+      Outer ring.
     */
 
     ctx.shadowBlur = 0;
@@ -867,7 +855,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     ctx.strokeStyle =
-      "rgba(255,212,0,0.35)";
+      `rgba(
+        255,
+        212,
+        0,
+        ${0.35 * mouse.strength}
+      )`;
 
 
     ctx.stroke();
@@ -908,6 +901,92 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     drawCursor();
+
+  }
+
+
+  /* ==================================================
+     SMOOTH ENTER / EXIT ANIMATION
+     ================================================== */
+
+  function animateInteraction() {
+
+    /*
+      Ease current strength toward target.
+
+      0.075 controls the speed.
+
+      Lower = slower
+      Higher = faster
+    */
+
+    mouse.strength +=
+      (
+        mouse.targetStrength -
+        mouse.strength
+      ) * 0.075;
+
+
+    /*
+      Snap the final tiny fraction so
+      animation doesn't run forever.
+    */
+
+    if (
+      Math.abs(
+        mouse.targetStrength -
+        mouse.strength
+      ) < 0.002
+    ) {
+
+      mouse.strength =
+        mouse.targetStrength;
+
+    }
+
+
+    draw();
+
+
+    /*
+      Continue only while transition
+      is still happening.
+    */
+
+    if (
+      mouse.strength !==
+      mouse.targetStrength
+    ) {
+
+      animationFrame =
+        requestAnimationFrame(
+          animateInteraction
+        );
+
+    } else {
+
+      animationFrame = null;
+
+    }
+
+  }
+
+
+  /* ==================================================
+     START ANIMATION
+     ================================================== */
+
+  function startAnimation() {
+
+    if (animationFrame !== null) {
+      return;
+    }
+
+
+    animationFrame =
+      requestAnimationFrame(
+        animateInteraction
+      );
 
   }
 
