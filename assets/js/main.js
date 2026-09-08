@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       navToggle.classList.toggle("is-open", isOpen);
       navToggle.setAttribute("aria-expanded", String(isOpen));
+
       navToggle.setAttribute(
         "aria-label",
         isOpen ? "Close navigation" : "Open navigation"
@@ -43,21 +44,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ==================================================
-     FINANCE HERO CANVAS
+     CANVAS
      ================================================== */
 
   const canvas = document.getElementById("finance-canvas");
 
-  if (!canvas) {
-    return;
-  }
+  if (!canvas) return;
 
   const ctx = canvas.getContext("2d");
   const hero = canvas.closest(".hero");
 
-  if (!ctx || !hero) {
-    return;
-  }
+  if (!ctx || !hero) return;
 
 
   /* ==================================================
@@ -71,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let width = 0;
   let height = 0;
   let dpr = 1;
+
   let animationFrame = null;
   let time = 0;
 
@@ -79,12 +77,77 @@ document.addEventListener("DOMContentLoaded", () => {
     y: 0,
     targetX: 0,
     targetY: 0,
-    active: false
+    active: false,
+    strength: 0
   };
 
 
   /* ==================================================
-     RESIZE CANVAS
+     DETERMINISTIC RANDOM
+     ================================================== */
+
+  /*
+    Gives us irregular price paths that remain
+    consistent between frames instead of flickering.
+  */
+
+  function seededRandom(seed) {
+    const value = Math.sin(seed * 12.9898) * 43758.5453;
+    return value - Math.floor(value);
+  }
+
+
+  /* ==================================================
+     CREATE PRICE SERIES
+     ================================================== */
+
+  const seriesDefinitions = [
+    {
+      seed: 11,
+      base: 0.24,
+      volatility: 0.065,
+      trend: 0.05,
+      color: "rgba(81, 174, 240, 0.34)",
+      lineWidth: 1.4
+    },
+    {
+      seed: 27,
+      base: 0.38,
+      volatility: 0.075,
+      trend: -0.025,
+      color: "rgba(61, 196, 255, 0.45)",
+      lineWidth: 1.5
+    },
+    {
+      seed: 43,
+      base: 0.53,
+      volatility: 0.09,
+      trend: 0.065,
+      color: "rgba(74, 201, 255, 0.95)",
+      lineWidth: 2.5,
+      glow: true
+    },
+    {
+      seed: 68,
+      base: 0.67,
+      volatility: 0.06,
+      trend: -0.035,
+      color: "rgba(151, 211, 255, 0.28)",
+      lineWidth: 1.2
+    },
+    {
+      seed: 91,
+      base: 0.78,
+      volatility: 0.055,
+      trend: 0.03,
+      color: "rgba(97, 177, 235, 0.20)",
+      lineWidth: 1
+    }
+  ];
+
+
+  /* ==================================================
+     RESIZE
      ================================================== */
 
   function resizeCanvas() {
@@ -124,41 +187,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
   resizeCanvas();
 
-  window.addEventListener(
-    "resize",
-    resizeCanvas
-  );
+  window.addEventListener("resize", resizeCanvas);
 
 
   /* ==================================================
-     POINTER INTERACTION
+     POINTER
      ================================================== */
 
-  hero.addEventListener(
-    "pointermove",
-    (event) => {
-      const rect = hero.getBoundingClientRect();
+  hero.addEventListener("pointermove", (event) => {
+    const rect = hero.getBoundingClientRect();
 
-      mouse.targetX =
-        event.clientX - rect.left;
+    mouse.targetX = event.clientX - rect.left;
+    mouse.targetY = event.clientY - rect.top;
 
-      mouse.targetY =
-        event.clientY - rect.top;
-
-      mouse.active = true;
-    }
-  );
+    mouse.active = true;
+  });
 
 
-  hero.addEventListener(
-    "pointerleave",
-    () => {
-      mouse.targetX = width * 0.72;
-      mouse.targetY = height * 0.5;
-
-      mouse.active = false;
-    }
-  );
+  hero.addEventListener("pointerleave", () => {
+    mouse.active = false;
+  });
 
 
   /* ==================================================
@@ -168,62 +216,51 @@ document.addEventListener("DOMContentLoaded", () => {
   function drawGrid() {
     ctx.save();
 
-    ctx.strokeStyle =
-      "rgba(255, 255, 255, 0.06)";
+    const spacingX = 65;
+    const spacingY = 55;
 
     ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(255,255,255,0.055)";
 
-    const spacing = 55;
 
     /*
-      Stronger parallax movement than the
-      previous version.
+      Only a tiny amount of idle/parallax movement.
     */
 
     const offsetX =
-      ((mouse.x / width) - 0.5) * 28;
+      mouse.active
+        ? ((mouse.x / width) - 0.5) * 8
+        : 0;
 
     const offsetY =
-      ((mouse.y / height) - 0.5) * 28;
+      mouse.active
+        ? ((mouse.y / height) - 0.5) * 8
+        : 0;
 
 
     for (
-      let x = -spacing;
-      x < width + spacing;
-      x += spacing
+      let x = -spacingX;
+      x <= width + spacingX;
+      x += spacingX
     ) {
       ctx.beginPath();
 
-      ctx.moveTo(
-        x + offsetX,
-        0
-      );
-
-      ctx.lineTo(
-        x + offsetX,
-        height
-      );
+      ctx.moveTo(x + offsetX, 0);
+      ctx.lineTo(x + offsetX, height);
 
       ctx.stroke();
     }
 
 
     for (
-      let y = -spacing;
-      y < height + spacing;
-      y += spacing
+      let y = -spacingY;
+      y <= height + spacingY;
+      y += spacingY
     ) {
       ctx.beginPath();
 
-      ctx.moveTo(
-        0,
-        y + offsetY
-      );
-
-      ctx.lineTo(
-        width,
-        y + offsetY
-      );
+      ctx.moveTo(0, y + offsetY);
+      ctx.lineTo(width, y + offsetY);
 
       ctx.stroke();
     }
@@ -233,363 +270,315 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ==================================================
-     MODEL CURVE
+     PRICE PATH
      ================================================== */
 
-  function modelCurve(
-    x,
-    phase,
-    amplitude,
-    frequency
-  ) {
-    const normalized =
-      x / width;
-
-    return (
-      Math.sin(
-        normalized * frequency +
-        phase
-      ) * amplitude
-    );
-  }
-
-
-  /* ==================================================
-     STOCHASTIC-LIKE SERIES
-     ================================================== */
-
-  function stochasticCurve(
-    x,
-    phase
-  ) {
-    const n =
-      x / width;
-
-    const wave1 =
-      Math.sin(
-        n * 10 +
-        phase
-      ) * 38;
-
-    const wave2 =
-      Math.sin(
-        n * 23 -
-        phase * 0.7
-      ) * 18;
-
-    const wave3 =
-      Math.sin(
-        n * 47 +
-        phase * 1.4
-      ) * 8;
-
-    const wave4 =
-      Math.sin(
-        n * 83 -
-        phase * 0.35
-      ) * 4;
-
-    const trend =
-      (n - 0.5) * -65;
-
-    return (
-      wave1 +
-      wave2 +
-      wave3 +
-      wave4 +
-      trend
-    );
-  }
-
-
-  /* ==================================================
-     DRAMATIC MOUSE DISTORTION
-     ================================================== */
-
-  function mouseInfluence(
-    x,
-    y
-  ) {
-    const dx =
-      x - mouse.x;
-
-    const dy =
-      y - mouse.y;
-
-    const distance =
-      Math.sqrt(
-        dx * dx +
-        dy * dy
-      );
+  function getPricePath(definition) {
+    const points = [];
 
     /*
-      Large interaction field.
+      Wider spacing creates more rigid/angular
+      financial-chart geometry.
     */
 
-    const radius = 380;
+    const segments = 34;
 
-    if (distance > radius) {
-      return 0;
+    const stepX = width / segments;
+
+    let value =
+      height * definition.base;
+
+    /*
+      Extremely slow movement while idle.
+    */
+
+    const drift =
+      Math.sin(
+        time * 0.12 +
+        definition.seed
+      ) * 4;
+
+
+    for (let i = 0; i <= segments; i++) {
+      const x = i * stepX;
+
+      if (i > 0) {
+        const random =
+          seededRandom(
+            definition.seed * 1000 +
+            i * 17
+          );
+
+        const move =
+          (random - 0.5) *
+          height *
+          definition.volatility;
+
+        value += move;
+      }
+
+
+      /*
+        Long-term slope.
+      */
+
+      const trend =
+        definition.trend *
+        height *
+        (i / segments);
+
+
+      /*
+        Small slow drift, rather than continuous
+        wave motion.
+      */
+
+      const localDrift =
+        Math.sin(
+          time * 0.08 +
+          i * 0.32 +
+          definition.seed
+        ) * 2;
+
+
+      points.push({
+        x,
+        y:
+          value +
+          trend +
+          drift +
+          localDrift
+      });
+    }
+
+    return points;
+  }
+
+
+  /* ==================================================
+     CURSOR CONVERGENCE
+     ================================================== */
+
+  function distortPoint(point) {
+    if (mouse.strength <= 0.001) {
+      return point;
     }
 
     /*
-      Strongest near the cursor,
-      fading smoothly outward.
+      Horizontal distance determines how strongly
+      this section of the line converges.
     */
 
-    const normalized =
-      1 - distance / radius;
+    const dx =
+      point.x - mouse.x;
 
-    const strength =
-      normalized * normalized;
+    const radius =
+      Math.min(
+        360,
+        width * 0.32
+      );
+
+
+    if (Math.abs(dx) > radius) {
+      return point;
+    }
+
+
+    const normalized =
+      1 -
+      Math.abs(dx) / radius;
 
 
     /*
-      Pull the line toward the cursor.
+      Cubic falloff means the attraction becomes
+      dramatically stronger near the cursor.
     */
 
     const attraction =
-      (mouse.y - y) *
-      strength *
-      0.72;
+      normalized *
+      normalized *
+      normalized *
+      mouse.strength;
 
 
     /*
-      Add an elastic ripple around
-      the interaction point.
+      Almost all series meet at the cursor,
+      but retain a tiny amount of separation
+      so individual lines remain visible.
     */
 
-    const ripple =
+    const targetY =
+      mouse.y +
       Math.sin(
-        distance * 0.035 -
-        time * 5
-      ) *
-      30 *
-      strength;
+        point.x * 0.03
+      ) * 2;
 
 
-    return (
-      attraction +
-      ripple
-    );
+    const y =
+      point.y +
+      (targetY - point.y) *
+      attraction *
+      0.96;
+
+
+    /*
+      Slight horizontal pull creates a visual
+      funnel into the cursor.
+    */
+
+    const horizontalPull =
+      (mouse.x - point.x) *
+      attraction *
+      0.055;
+
+
+    return {
+      x:
+        point.x +
+        horizontalPull,
+
+      y
+    };
   }
 
 
   /* ==================================================
-     DRAW SERIES
+     DRAW PRICE SERIES
      ================================================== */
 
-  function drawSeries({
-    baseY,
-    amplitude,
-    frequency,
-    speed,
-    color,
-    width: lineWidth,
-    stochastic = false,
-    glow = false
-  }) {
+  function drawPriceSeries(definition) {
+    const points =
+      getPricePath(definition);
+
     ctx.save();
 
     ctx.beginPath();
 
-    ctx.lineWidth =
-      lineWidth;
-
     ctx.strokeStyle =
-      color;
+      definition.color;
 
-    ctx.lineJoin =
-      "round";
+    ctx.lineWidth =
+      definition.lineWidth;
 
-    ctx.lineCap =
-      "round";
+    ctx.lineJoin = "miter";
+    ctx.lineCap = "round";
 
 
-    if (glow) {
-      ctx.shadowBlur = 22;
-      ctx.shadowColor = color;
+    if (definition.glow) {
+      ctx.shadowBlur = 16;
+      ctx.shadowColor =
+        "rgba(64,195,255,0.8)";
     }
 
 
-    const phase =
-      time * speed;
+    points.forEach((point, index) => {
+      const distorted =
+        distortPoint(point);
 
-    const step = 4;
-
-
-    for (
-      let x = -10;
-      x <= width + 10;
-      x += step
-    ) {
-      let offset;
-
-      if (stochastic) {
-        offset =
-          stochasticCurve(
-            x,
-            phase
-          );
-      } else {
-        offset =
-          modelCurve(
-            x,
-            phase,
-            amplitude,
-            frequency
-          );
-      }
-
-
-      let y =
-        baseY +
-        offset;
-
-
-      /*
-        Dramatic local distortion.
-      */
-
-      y += mouseInfluence(
-        x,
-        y
-      );
-
-
-      if (x === -10) {
+      if (index === 0) {
         ctx.moveTo(
-          x,
-          y
+          distorted.x,
+          distorted.y
         );
       } else {
+        /*
+          Straight line segments instead of
+          curves give us the stock-chart look.
+        */
+
         ctx.lineTo(
-          x,
-          y
+          distorted.x,
+          distorted.y
         );
       }
-    }
+    });
 
 
     ctx.stroke();
-
     ctx.restore();
   }
 
 
   /* ==================================================
-     FLOATING DATA POINTS
+     DATA POINTS
      ================================================== */
 
-  function drawPoints() {
-    const points = 24;
+  function drawDataPoints() {
+    seriesDefinitions.forEach(
+      (definition, seriesIndex) => {
 
-    for (
-      let i = 0;
-      i < points;
-      i++
-    ) {
-      const seed =
-        i * 137.5;
+        const points =
+          getPricePath(definition);
 
-      const x =
-        (
-          seed * 7 +
-          time * (10 + i % 5)
-        ) %
-        (width + 100) -
-        50;
+        /*
+          Only show occasional nodes.
+        */
 
-      const base =
-        height * (
-          0.18 +
-          (i % 8) * 0.085
+        points.forEach(
+          (point, index) => {
+
+            if (index % 5 !== 0) {
+              return;
+            }
+
+            const distorted =
+              distortPoint(point);
+
+
+            const dx =
+              distorted.x - mouse.x;
+
+            const dy =
+              distorted.y - mouse.y;
+
+            const distance =
+              Math.sqrt(
+                dx * dx +
+                dy * dy
+              );
+
+
+            const proximity =
+              mouse.active
+                ? Math.max(
+                    0,
+                    1 - distance / 180
+                  )
+                : 0;
+
+
+            ctx.beginPath();
+
+            ctx.arc(
+              distorted.x,
+              distorted.y,
+              1.2 + proximity * 2.2,
+              0,
+              Math.PI * 2
+            );
+
+            ctx.fillStyle =
+              `rgba(
+                120,
+                210,
+                255,
+                ${0.15 + proximity * 0.65}
+              )`;
+
+            ctx.fill();
+          }
         );
-
-      let y =
-        base +
-        Math.sin(
-          time * 0.45 +
-          i * 1.7
-        ) * 26;
-
-
-      const dx =
-        x - mouse.x;
-
-      const dy =
-        y - mouse.y;
-
-      const distance =
-        Math.sqrt(
-          dx * dx +
-          dy * dy
-        );
-
-
-      const nearMouse =
-        Math.max(
-          0,
-          1 - distance / 260
-        );
-
-
-      /*
-        Nearby particles are pulled
-        toward the pointer as well.
-      */
-
-      if (mouse.active) {
-        y +=
-          (mouse.y - y) *
-          nearMouse *
-          0.18;
       }
-
-
-      const radius =
-        1.3 +
-        nearMouse * 3.5;
-
-
-      ctx.beginPath();
-
-      ctx.arc(
-        x,
-        y,
-        radius,
-        0,
-        Math.PI * 2
-      );
-
-
-      ctx.fillStyle =
-        `rgba(
-          110,
-          205,
-          255,
-          ${0.22 + nearMouse * 0.65}
-        )`;
-
-      if (nearMouse > 0.4) {
-        ctx.shadowBlur = 14;
-        ctx.shadowColor =
-          "rgba(75, 190, 255, 0.8)";
-      }
-
-      ctx.fill();
-
-      ctx.shadowBlur = 0;
-    }
+    );
   }
 
 
   /* ==================================================
-     CURSOR FIELD
+     CURSOR FOCUS
      ================================================== */
 
-  function drawCursorField() {
-    if (!mouse.active) {
+  function drawCursorFocus() {
+    if (mouse.strength < 0.05) {
       return;
     }
 
@@ -597,7 +586,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-      Large subtle interaction halo.
+      Vertical time marker.
+    */
+
+    ctx.beginPath();
+
+    ctx.moveTo(mouse.x, 0);
+    ctx.lineTo(mouse.x, height);
+
+    ctx.strokeStyle =
+      `rgba(
+        255,
+        255,
+        255,
+        ${0.12 * mouse.strength}
+      )`;
+
+    ctx.lineWidth = 1;
+
+    ctx.stroke();
+
+
+    /*
+      Horizontal value marker.
+    */
+
+    ctx.beginPath();
+
+    ctx.moveTo(0, mouse.y);
+    ctx.lineTo(width, mouse.y);
+
+    ctx.strokeStyle =
+      `rgba(
+        255,
+        255,
+        255,
+        ${0.07 * mouse.strength}
+      )`;
+
+    ctx.stroke();
+
+
+    /*
+      Interaction halo.
     */
 
     const gradient =
@@ -607,33 +638,33 @@ document.addEventListener("DOMContentLoaded", () => {
         0,
         mouse.x,
         mouse.y,
-        180
+        150
       );
 
     gradient.addColorStop(
       0,
-      "rgba(50, 197, 255, 0.13)"
-    );
-
-    gradient.addColorStop(
-      0.45,
-      "rgba(50, 197, 255, 0.05)"
+      `rgba(
+        61,
+        197,
+        255,
+        ${0.13 * mouse.strength}
+      )`
     );
 
     gradient.addColorStop(
       1,
-      "rgba(50, 197, 255, 0)"
+      "rgba(61,197,255,0)"
     );
 
-    ctx.fillStyle =
-      gradient;
+
+    ctx.fillStyle = gradient;
 
     ctx.beginPath();
 
     ctx.arc(
       mouse.x,
       mouse.y,
-      180,
+      150,
       0,
       Math.PI * 2
     );
@@ -642,54 +673,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-      Vertical reference line.
+      Yellow focal point.
     */
 
     ctx.beginPath();
 
-    ctx.moveTo(
+    ctx.arc(
       mouse.x,
-      0
-    );
-
-    ctx.lineTo(
-      mouse.x,
-      height
-    );
-
-    ctx.strokeStyle =
-      "rgba(255, 255, 255, 0.16)";
-
-    ctx.lineWidth = 1;
-
-    ctx.stroke();
-
-
-    /*
-      Horizontal reference line.
-    */
-
-    ctx.beginPath();
-
-    ctx.moveTo(
+      mouse.y,
+      5,
       0,
-      mouse.y
+      Math.PI * 2
     );
 
-    ctx.lineTo(
-      width,
-      mouse.y
-    );
+    ctx.fillStyle =
+      `rgba(
+        255,
+        212,
+        0,
+        ${mouse.strength}
+      )`;
 
-    ctx.strokeStyle =
-      "rgba(255, 255, 255, 0.07)";
+    ctx.shadowBlur = 24;
 
-    ctx.stroke();
+    ctx.shadowColor =
+      "rgba(255,212,0,0.9)";
+
+    ctx.fill();
 
 
     /*
-      Outer cursor ring.
+      Outer ring.
     */
+
+    ctx.shadowBlur = 0;
 
     ctx.beginPath();
 
@@ -702,36 +719,14 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     ctx.strokeStyle =
-      "rgba(255, 212, 0, 0.35)";
-
-    ctx.lineWidth = 1;
+      `rgba(
+        255,
+        212,
+        0,
+        ${0.35 * mouse.strength}
+      )`;
 
     ctx.stroke();
-
-
-    /*
-      Glowing cursor point.
-    */
-
-    ctx.beginPath();
-
-    ctx.arc(
-      mouse.x,
-      mouse.y,
-      4.5,
-      0,
-      Math.PI * 2
-    );
-
-    ctx.fillStyle =
-      "rgba(255, 212, 0, 1)";
-
-    ctx.shadowBlur = 22;
-
-    ctx.shadowColor =
-      "rgba(255, 212, 0, 0.95)";
-
-    ctx.fill();
 
 
     ctx.restore();
@@ -752,107 +747,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-      Faster pointer response.
+      Smooth cursor tracking.
     */
 
     mouse.x +=
-      (
-        mouse.targetX -
-        mouse.x
-      ) * 0.16;
+      (mouse.targetX - mouse.x) *
+      0.18;
 
     mouse.y +=
+      (mouse.targetY - mouse.y) *
+      0.18;
+
+
+    /*
+      Fade the convergence in/out rather
+      than switching instantly.
+    */
+
+    const targetStrength =
+      mouse.active ? 1 : 0;
+
+    mouse.strength +=
       (
-        mouse.targetY -
-        mouse.y
-      ) * 0.16;
+        targetStrength -
+        mouse.strength
+      ) * 0.09;
 
 
     drawGrid();
 
 
-    /*
-      Upper model curve.
-    */
+    seriesDefinitions.forEach(
+      drawPriceSeries
+    );
 
-    drawSeries({
-      baseY: height * 0.25,
-      amplitude: 48,
-      frequency: 8,
-      speed: 0.22,
-      color:
-        "rgba(78, 168, 235, 0.34)",
-      width: 1.5
-    });
+
+    drawDataPoints();
+
+    drawCursorFocus();
 
 
     /*
-      Middle model curve.
+      Much slower idle animation.
     */
-
-    drawSeries({
-      baseY: height * 0.42,
-      amplitude: 75,
-      frequency: 12,
-      speed: -0.16,
-      color:
-        "rgba(51, 197, 255, 0.30)",
-      width: 1.4
-    });
-
-
-    /*
-      Lower model curve.
-    */
-
-    drawSeries({
-      baseY: height * 0.68,
-      amplitude: 58,
-      frequency: 7,
-      speed: 0.13,
-      color:
-        "rgba(160, 211, 255, 0.22)",
-      width: 1.2
-    });
-
-
-    /*
-      Additional faint model curve.
-    */
-
-    drawSeries({
-      baseY: height * 0.78,
-      amplitude: 35,
-      frequency: 16,
-      speed: -0.09,
-      color:
-        "rgba(91, 175, 235, 0.15)",
-      width: 1
-    });
-
-
-    /*
-      Main stochastic path.
-    */
-
-    drawSeries({
-      baseY: height * 0.53,
-      speed: 0.34,
-      color:
-        "rgba(64, 195, 255, 0.96)",
-      width: 2.5,
-      stochastic: true,
-      glow: true
-    });
-
-
-    drawPoints();
-
-    drawCursorField();
-
 
     if (!reduceMotion) {
-      time += 0.014;
+      time += 0.004;
 
       animationFrame =
         requestAnimationFrame(draw);
@@ -874,6 +814,11 @@ document.addEventListener("DOMContentLoaded", () => {
   if (reduceMotion) {
     hero.addEventListener(
       "pointermove",
+      draw
+    );
+
+    hero.addEventListener(
+      "pointerleave",
       draw
     );
 
