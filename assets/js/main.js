@@ -920,11 +920,16 @@ document.addEventListener("DOMContentLoaded", () => {
       Higher = faster
     */
 
-    mouse.strength +=
-      (
-        mouse.targetStrength -
-        mouse.strength
-      ) * 0.075;
+    const easing =
+  mouse.targetStrength === 0
+    ? 0.025
+    : 0.10;
+
+mouse.strength +=
+  (
+    mouse.targetStrength -
+    mouse.strength
+  ) * easing;
 
 
     /*
@@ -936,7 +941,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Math.abs(
         mouse.targetStrength -
         mouse.strength
-      ) < 0.002
+      ) < 0.0005
     ) {
 
       mouse.strength =
