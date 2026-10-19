@@ -216,6 +216,7 @@ select {
   height: 2px;
   margin: 5px auto;
   background: currentColor;
+
   transition:
     transform 0.2s ease,
     opacity 0.2s ease;
@@ -250,7 +251,7 @@ select {
 }
 
 
-/* Canvas containing the finance animation */
+/* Animated finance canvas */
 
 #finance-canvas {
   position: absolute;
@@ -459,7 +460,7 @@ select {
 
 
 /* ==================================================
-   CARDS
+   GENERAL CARDS
    ================================================== */
 
 .cards {
@@ -491,6 +492,56 @@ select {
 
 
 /* ==================================================
+   SPEAKER GRID LAYOUTS
+   ================================================== */
+
+/*
+  Plenary speakers:
+  Five evenly spaced cards on large desktop.
+*/
+
+.speaker-grid--plenary {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px;
+}
+
+
+/*
+  Invited speakers:
+  Three columns, two rows.
+*/
+
+.speaker-grid--invited {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+
+/*
+  Speaker cards have slightly tighter padding
+  than general content cards.
+*/
+
+.speaker-card {
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  min-width: 0;
+}
+
+.speaker-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.12rem;
+  line-height: 1.35;
+}
+
+.speaker-card .muted {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+
+/* ==================================================
    SPEAKER PHOTOS
    ================================================== */
 
@@ -504,11 +555,12 @@ select {
 
   margin-bottom: 20px;
 
-  background: linear-gradient(
-    135deg,
-    var(--sky),
-    #eef3f8
-  );
+  background:
+    linear-gradient(
+      135deg,
+      var(--sky),
+      #eef3f8
+    );
 
   border-radius: 12px;
 
@@ -519,7 +571,7 @@ select {
 }
 
 
-/* Ensure all headshots fill the portrait frame */
+/* Portrait images */
 
 .speaker-photo img {
   display: block;
@@ -529,6 +581,27 @@ select {
 
   object-fit: cover;
   object-position: center top;
+}
+
+
+/* Linked speaker photos */
+
+.speaker-photo-link {
+  display: block;
+  text-decoration: none;
+  border-radius: 12px;
+}
+
+.speaker-photo-link .speaker-photo {
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.speaker-photo-link:hover .speaker-photo,
+.speaker-photo-link:focus-visible .speaker-photo {
+  box-shadow: 0 8px 24px rgba(0, 42, 92, 0.16);
+  transform: translateY(-3px);
 }
 
 
@@ -668,7 +741,27 @@ select {
 
 
 /* ==================================================
-   TABLET & MOBILE
+   TABLET / SMALL DESKTOP
+   ================================================== */
+
+@media (max-width: 1100px) {
+
+  /*
+    Switch plenary cards to two columns
+    before the five-column layout becomes
+    too cramped.
+  */
+
+  .speaker-grid--plenary,
+  .speaker-grid--invited {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+/* ==================================================
+   TABLET & MOBILE NAVIGATION
    ================================================== */
 
 @media (max-width: 960px) {
@@ -817,6 +910,8 @@ select {
 
   .stats,
   .cards,
+  .speaker-grid--plenary,
+  .speaker-grid--invited,
   .footer-grid {
     grid-template-columns: 1fr;
   }
@@ -836,6 +931,10 @@ select {
 
   .card {
     padding: 22px;
+  }
+
+  .speaker-card {
+    padding: 18px;
   }
 
 }
