@@ -26,6 +26,9 @@
   --line: #d9e0e7;
 
   --accent: #ffd400;
+  --orange: #fc673f;
+  --orange-dark: #b63b13;
+  --orange-soft: #fff1e9;
 
   --max: 1180px;
   --radius: 18px;
@@ -197,6 +200,31 @@ select {
 
 
 /* ==================================================
+   CALL FOR PAPERS NAVIGATION
+   ================================================== */
+
+/*
+  Darker orange text maintains readability
+  on the white header.
+
+  The underline uses the brighter U of T
+  communications orange.
+*/
+
+.main-nav a.nav-call {
+  color: var(--orange-dark);
+  border-bottom-color: var(--orange);
+}
+
+.main-nav a.nav-call:hover,
+.main-nav a.nav-call:focus,
+.main-nav a.nav-call.active {
+  color: #8f2e0e;
+  border-bottom-color: var(--orange);
+}
+
+
+/* ==================================================
    MOBILE MENU BUTTON
    ================================================== */
 
@@ -313,26 +341,14 @@ select {
   letter-spacing: 0.12em;
 }
 
-
-/* Refined homepage title */
-
 .hero h1 {
   max-width: 850px;
   margin: 0 0 28px;
   color: #ffffff;
-
   font-size: clamp(2.8rem, 5vw, 4.6rem);
   font-weight: 600;
   line-height: 1.08;
   letter-spacing: -0.035em;
-}
-
-.hero .subtitle {
-  max-width: 680px;
-  margin: 0;
-  color: #e7eef8;
-  font-size: 1.2rem;
-  line-height: 1.55;
 }
 
 
@@ -345,6 +361,7 @@ select {
   flex-wrap: wrap;
   gap: 14px;
   margin-top: 32px;
+  align-items: center;
 }
 
 .btn {
@@ -354,6 +371,7 @@ select {
   border-radius: 999px;
   text-decoration: none;
   font-weight: 700;
+  text-align: center;
 
   transition:
     transform 0.18s ease,
@@ -417,13 +435,9 @@ select {
   letter-spacing: 0.1em;
 }
 
-
-/* Standardized section headings */
-
 .section h2 {
   margin: 10px 0 22px;
   color: var(--navy);
-
   font-size: clamp(1.9rem, 3vw, 2.65rem);
   font-weight: 600;
   line-height: 1.18;
@@ -446,17 +460,43 @@ select {
 
 
 /* ==================================================
-   CONFERENCE STATISTICS
+   CONFERENCE DETAILS + CALL FOR PAPERS
    ================================================== */
+
+.conference-overview {
+  padding: 48px 0;
+}
+
+.conference-overview-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+
+/* Four conference statistics */
+
+.conference-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
 }
 
 .stat {
-  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 22px;
   background: #ffffff;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -466,8 +506,89 @@ select {
   display: block;
   margin-bottom: 4px;
   color: var(--navy);
-  font-size: 1.7rem;
+  font-size: clamp(1.25rem, 2vw, 1.7rem);
   font-weight: 600;
+  line-height: 1.2;
+}
+
+.stat span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+
+/* ==================================================
+   CALL FOR PAPERS HIGHLIGHT CARD
+   ================================================== */
+
+.callout-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  min-width: 0;
+  padding: 30px 34px;
+
+  background: var(--orange-soft);
+  border: 1px solid #ffd1bd;
+  border-radius: var(--radius);
+}
+
+.callout-card .section-kicker {
+  color: var(--orange-dark);
+  margin: 0 0 8px;
+}
+
+.section .callout-card h2 {
+  margin: 0 0 16px;
+  color: var(--navy);
+  font-size: clamp(1.45rem, 2.2vw, 1.9rem);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.callout-card p {
+  margin: 0 0 12px;
+  font-size: 0.96rem;
+  line-height: 1.55;
+}
+
+.callout-card .actions {
+  margin-top: 16px;
+}
+
+
+/* Orange submission button */
+
+.btn-call {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: var(--navy);
+}
+
+.btn-call:hover,
+.btn-call:focus-visible {
+  background: #f15a31;
+  border-color: #f15a31;
+  color: var(--navy);
+}
+
+
+/* Secondary link */
+
+.callout-link {
+  display: inline-block;
+  padding: 10px 4px;
+  color: var(--navy);
+  font-size: 0.94rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.callout-link:hover,
+.callout-link:focus-visible {
+  color: var(--orange-dark);
 }
 
 
@@ -505,7 +626,7 @@ select {
 
 
 /* ==================================================
-   CONSISTENT SPEAKER GRID
+   SPEAKER GRID
    ================================================== */
 
 .speaker-grid--plenary,
@@ -515,11 +636,6 @@ select {
   gap: 18px;
   align-items: stretch;
 }
-
-
-/* ==================================================
-   SPEAKER CARDS
-   ================================================== */
 
 .speaker-card {
   display: flex;
@@ -549,10 +665,8 @@ select {
   width: 100%;
   aspect-ratio: 4 / 5;
   overflow: hidden;
-
   display: grid;
   place-items: center;
-
   margin-bottom: 20px;
 
   background:
@@ -563,7 +677,6 @@ select {
     );
 
   border-radius: 12px;
-
   color: var(--navy);
   font-size: 0.9rem;
   font-weight: 700;
@@ -578,9 +691,6 @@ select {
   object-fit: cover;
   object-position: center top;
 }
-
-
-/* Linked photographs */
 
 .speaker-photo-link {
   display: block;
@@ -599,9 +709,6 @@ select {
   box-shadow: 0 8px 24px rgba(0, 42, 92, 0.16);
   transform: translateY(-3px);
 }
-
-
-/* Speaker name links */
 
 .card h3 a {
   color: var(--navy);
@@ -677,14 +784,6 @@ select {
    SECONDARY PAGE HERO BANNERS
    ================================================== */
 
-/*
-  Applies automatically to:
-  About, Program, Speakers, Contact,
-  Travel and Registration.
-
-  No JavaScript animation on these pages.
-*/
-
 .page-hero {
   position: relative;
   min-height: 260px;
@@ -692,7 +791,6 @@ select {
   align-items: center;
   overflow: hidden;
   padding: 65px 0;
-
   color: #ffffff;
 
   background:
@@ -709,20 +807,13 @@ select {
     );
 }
 
-
-/* Ensure content sits above the background */
-
 .page-hero .container {
   position: relative;
   z-index: 1;
 }
 
-
-/* Dates and small headings */
-
 .page-hero .section-kicker {
   margin: 0 0 16px;
-
   color: #d5e6f8;
   font-size: 0.8rem;
   font-weight: 600;
@@ -730,15 +821,10 @@ select {
   text-transform: uppercase;
 }
 
-
-/* Standardized page titles */
-
 .page-hero h1 {
   max-width: 900px;
   margin: 0;
-
   color: #ffffff;
-
   font-size: clamp(2rem, 3.4vw, 3.1rem);
   font-weight: 600;
   line-height: 1.15;
@@ -754,13 +840,9 @@ select {
   padding: 64px 0 90px;
 }
 
-
-/* Smaller headings throughout interior pages */
-
 .page-content h2 {
   margin: 42px 0 18px;
   color: var(--navy);
-
   font-size: clamp(1.5rem, 2.2vw, 1.9rem);
   font-weight: 600;
   line-height: 1.25;
@@ -840,7 +922,7 @@ select {
 
 
 /* ==================================================
-   TABLET / SMALL DESKTOP
+   SMALL DESKTOP / TABLET
    ================================================== */
 
 @media (max-width: 1100px) {
@@ -873,11 +955,9 @@ select {
     top: 78px;
     left: 0;
     right: 0;
-
     flex-direction: column;
     align-items: stretch;
     gap: 0;
-
     padding: 15px 24px 25px;
     background: #ffffff;
     border-bottom: 1px solid var(--line);
@@ -893,9 +973,9 @@ select {
     border-bottom: 1px solid var(--line);
   }
 
-  .nav-cta {
-    margin-top: 12px;
-    text-align: center;
+  .main-nav a.nav-call {
+    color: var(--orange-dark);
+    border-bottom-color: var(--orange);
   }
 
   .nav-toggle.is-open span:nth-child(1) {
@@ -937,6 +1017,17 @@ select {
   }
 
 
+  /* Combined conference details */
+
+  .conference-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .conference-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+
   /* Interior page banners */
 
   .page-hero {
@@ -953,7 +1044,7 @@ select {
   }
 
   .stats {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .cards {
@@ -1002,6 +1093,42 @@ select {
   .hero .btn {
     width: 100%;
     text-align: center;
+  }
+
+
+  /* Combined conference details */
+
+  .conference-overview {
+    padding: 36px 0;
+  }
+
+  .conference-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .conference-stats .stat {
+    padding: 16px 12px;
+  }
+
+  .conference-stats .stat strong {
+    font-size: 1.15rem;
+  }
+
+  .conference-stats .stat span {
+    font-size: 0.78rem;
+  }
+
+  .callout-card {
+    padding: 26px 22px;
+  }
+
+  .callout-card .actions {
+    align-items: stretch;
+  }
+
+  .callout-card .btn-call {
+    width: 100%;
   }
 
 
