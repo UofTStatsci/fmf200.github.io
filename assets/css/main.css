@@ -1206,3 +1206,35 @@ select {
   }
 
 }
+
+/* ==================================================
+   REGISTRATION CARDS
+   ================================================== */
+
+.registration-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.registration-grid .card {
+  display: flex;
+  flex-direction: column;
+}
+
+.registration-grid .card .actions {
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+@media (max-width: 960px) {
+  .registration-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .registration-grid {
+    grid-template-columns: 1fr;
+  }
+}
