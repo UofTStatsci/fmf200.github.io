@@ -1238,3 +1238,46 @@ select {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ==================================================
+   DEPARTMENT LOGO IN WEBSITE HEADER
+   ================================================== */
+
+.brand {
+  display: block;
+  flex: 0 0 auto;
+
+  width: 250px;
+  height: 68px;
+
+  background-image: url("../images/statistical-sciences-logo.png");
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: contain;
+
+  text-decoration: none;
+}
+
+/* Preserve text for accessibility,
+   but visually replace it with the logo. */
+
+.brand strong,
+.brand span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 620px) {
+  .brand {
+    width: 210px;
+    height: 60px;
+  }
+}
